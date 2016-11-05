@@ -21,8 +21,10 @@ class DataBuilder:
     def __init__(self, featureset):
         self.featureset = featureset
         self.subjects = os.listdir('%s/%s/' % (self.DATADIR, self.featureset))
+        if len(self.subjects) == 0:
+            raise Exception('Data for featureset "%s" does not exist.' % self.featureset)
 
-    def build_stim_probe_category():
+    def build_stim_probe_category(self):
 
         # prepare the data structure
         dataset = {}
@@ -42,7 +44,7 @@ class DataBuilder:
                 dataset['subjects'] += [sname] * len(areas)
 
         # load class labels
-        dataset['image_category'] = np.loadtxt('%s/../stimgroups.txt' % DATADIR, dtype='int')
+        dataset['image_category'] = np.loadtxt('%s/../stimgroups.txt' % self.DATADIR, dtype='int')
 
         # store the dataset
         with open('%s/stim_probe_category_ON_%s.pkl' % (self.OUTDIR, self.featureset), 'wb') as outfile:
@@ -59,4 +61,4 @@ if __name__ == '__main__':
     featureset = str(args.featureset)
 
     db = DataBuilder(featureset)
-    db.build_stim_probe_category
+    db.build_stim_probe_category()
