@@ -21,6 +21,8 @@ class DataBuilder:
     def __init__(self, featureset):
         self.featureset = featureset
         self.subjects = os.listdir('%s/%s/' % (self.DATADIR, self.featureset))
+        if len(self.subjects) == 0:
+            raise Exception('Data for featureset "%s" does not exist.' % self.featureset)
 
     def build_stim_probe_category(self):
 
