@@ -7,6 +7,5 @@
     * T = tool             50
     * tambulo = pseudoword 60
     * hgfjh = characters   70
-    * F = target fruit     80
+    * F = target fruit     80 -- excluded from the analysis
     * SCR = scrambled      90
-    * pauses 500ms         100
