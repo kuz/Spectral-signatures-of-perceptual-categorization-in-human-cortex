@@ -1,3 +1,13 @@
+## Order of things
+
+1. `matlab -nojvm -nodisplay -nosplash -r "structured_to_processed.m; exit"` to extract chunks of LFP recordings for each of the stimuli.  
+2. Drop trials with artifacts: `matlab -nojvm -nodisplay -nosplash -r "indata = 'LFP_8c'; preprocess_lfp_artifacts; exit"`  
+3. Bipolar referencing: `matlab -nojvm -nodisplay -nosplash -r "indata = 'LFP_8c_artif'; preprocess_lfp_to_bipolar; exit"`  
+4. Compute electrode responsiveness `matlab -nodisplay -nosplash -r "indata='LFP_8c_artif_bipolar'; preprocess_compute_responsiveness; exit"`  
+4. Filter out non-responsive probes
+5. Extract features
+
+
 ## List of stimuli categories
 
     * H = house            10
