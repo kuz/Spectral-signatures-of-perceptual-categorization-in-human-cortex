@@ -29,7 +29,7 @@ for wid = 1:nwin
 end
 
 % for each subject
-for si = 1:length(listing)
+for si = 1:2%length(listing)
     sfile = listing(si);
     disp(['Processing ' num2str(si) ' ' sfile.name])
     
@@ -119,7 +119,7 @@ for si = 1:length(listing)
                 bbm = reshape(baseline_band_means(wid, fid, :), 1, []);
                 fqbm = reshape(fqsignal_band_means(wid, fid, :), 1, []);
                 p = signrank(bbm, fqbm);
-                results{wid, fid} = [results{wid, fid}; range(1)-1+si, probe, p, 0, mean(bbm), mean(fqbm)];
+                results{wid, fid} = [results{wid, fid}; si, probe, p, 0, mean(bbm), mean(fqbm)];
             end
         end
     
