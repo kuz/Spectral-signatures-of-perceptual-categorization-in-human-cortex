@@ -8,15 +8,15 @@ import cPickle
 class DataBuilder:
 
     #: Paths
-    DATADIR = '../Data/Intracranial/Processed'
-    OUTDIR = '../Outcome'
+    DATADIR = '../../Data/Intracranial/Processed'
+    OUTDIR = '../../Outcome/Feature matrices'
 
     #: List of subjects
     subjects = None
 
     #: Data parameters
     featureset = None
-    nstim = 269
+    nstim = 401
 
     def __init__(self, featureset):
         self.featureset = featureset
@@ -44,16 +44,14 @@ class DataBuilder:
                 dataset['subjects'] += [sname] * len(areas)
 
         # load class labels
-        dataset['image_category'] = np.loadtxt('%s/../stimgroups.txt' % self.DATADIR, dtype='int')
+        dataset['image_category'] = np.loadtxt('stimgroups.txt', dtype='int')
 
         # store the dataset
-        with open('%s/stim_probe_category_ON_%s.pkl' % (self.OUTDIR, self.featureset), 'wb') as outfile:
+        with open('%s/featurematrix_%s.pkl' % (self.OUTDIR, self.featureset), 'wb') as outfile:
             cPickle.dump(dataset, outfile)
 
 
 if __name__ == '__main__':
-
-    # meangamma_bipolar_noscram_artif_brodmann_resppositive
 
     parser = argparse.ArgumentParser(description='Creates various datasets out of the processed intracranial data')
     parser.add_argument('-f', '--featureset', dest='featureset', type=str, required=True, help='Directory with brain features (Processed/?)')
