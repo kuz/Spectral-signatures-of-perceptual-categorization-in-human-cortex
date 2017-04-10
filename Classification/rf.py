@@ -4,11 +4,13 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn import cross_validation
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score
 import json
+import argparse
 
-#featureset = 'mean_75hz79_0ms200_LFP_8c_artif_bipolar_BA_responsive'
-#featureset = 'meanhighgamma_LFP_bipolar_noscram_artif_brodmann_w150_highgamma_positive'
-#featureset = 'mean_70hz150_50ms250_LFP_8c_artif_bipolar_BA_resppositive'
-featureset = 'mean_70hz150_50ms250_LFP_8c_artif_bipolar_BA_responsive'
+# parse cmd arguments
+parser = argparse.ArgumentParser(description='Build feature matrix from featureset')
+parser.add_argument('-f', '--featureset', dest='featureset', type=str, required=True, help='Name of the featureset (Processed/?)')
+args = parser.parse_args()
+featureset = str(args.featureset)
 
 # parameters
 DATADIR = '../../Outcome/Feature matrices/'

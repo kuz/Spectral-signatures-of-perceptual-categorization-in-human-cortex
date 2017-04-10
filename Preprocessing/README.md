@@ -7,7 +7,7 @@
 5. Compute electrode responsiveness `matlab -nodisplay -nosplash -r "indata='LFP_8c_artif_bipolar_BA'; preprocess_compute_responsiveness; exit"`  
 6. Filter out non-responsive probes `matlab -nojvm -nodisplay -nosplash -r "indata='LFP_8c_artif_bipolar_BA'; preprocess_keep_responsive; exit"`  
 7. Extract features `./extract_features.sh` (look inside if you wish to change some parameters)  
-8. `python DataBuilder.py -f mean_5hz9_0ms200_LFP_8c_artif_bipolar_BA_responsive`
+8. `python DataBuilder.py -f mean_5hz9_0ms200_LFP_8c_artif_bipolar_BA_responsive` (this item is a particular example, later in the project we will need to write an automation script to build the feature matrices for each relevant featureset)
 
 This concludes data preprocessing. Proceed to `Classification`.
 
