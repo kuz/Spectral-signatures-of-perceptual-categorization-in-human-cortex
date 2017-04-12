@@ -9,6 +9,7 @@ if ei + ef + ec + ew ~= 4
 end
 
 % parameters
+parpool(20);
 w_sta_ms = window(1);
 w_end_ms = window(2);
 w_sta_t = round(w_sta_ms / 1000 * 512);
@@ -25,14 +26,17 @@ addpath('spectra')
 
 % load subject list
 listing = dir(['../../Data/Intracranial/Processed/' indata '/*.mat']);
+nsubject = length(listing);
 
 % for each subject
-for sfile = listing'
-
+parfor sid = 1:nsubject
+    
+    sfile = listing(sid);
     disp(['Processing ' sfile.name])
     
     % load the data
-    load(['../../Data/Intracranial/Processed/' indata '/' sfile.name]);
+    s = load(['../../Data/Intracranial/Processed/' indata '/' sfile.name]);
+    s = s.s;
     
     % output data structure
     meanband = zeros(length(s.stimseq), length(s.probes.probe_ids));
@@ -95,12 +99,11 @@ for sfile = listing'
     
     % store extracted features
     s.data = meanband;
-    save(['../../Data/Intracranial/Processed/' outdata '/' sfile.name], 's');
+    parsave(['../../Data/Intracranial/Processed/' outdata '/' sfile.name], s);
     
     % clear all subject-specific variables
-    clearvars -except listing indata outdata freqlimits ncycles window w_sta_ms w_end_ms w_sta_t w_end_t
+    %clearvars -except listing indata outdata freqlimits ncycles window w_sta_ms w_end_ms w_sta_t w_end_t
     fprintf('\n')
 
 end
-
 
