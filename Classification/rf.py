@@ -30,8 +30,8 @@ with open('%s/featurematrix_%s.pkl' % (DATADIR, featureset), 'rb') as f:
 #data['neural_responses'] = data['neural_responses'][:, keep_probes]
 
 # filter out the target stimuli (80 -- fruit)
-for dropstim in [60, 70, 80, 90]:
-#for dropstim in [80]:
+#for dropstim in [60, 70, 80, 90]:
+for dropstim in [80]:
     keepidx = data['image_category'] != dropstim
     data['image_category'] = data['image_category'][keepidx]
     data['neural_responses'] = data['neural_responses'][keepidx]
