@@ -9,7 +9,6 @@ if ei + ef + ec + ew ~= 4
 end
 
 % parameters
-parpool(20);
 w_sta_ms = window(1);
 w_end_ms = window(2);
 w_sta_t = round(w_sta_ms / 1000 * 512);
@@ -29,7 +28,7 @@ listing = dir(['../../Data/Intracranial/Processed/' indata '/*.mat']);
 nsubject = length(listing);
 
 % for each subject
-parfor sid = 1:nsubject
+for sid = 1:nsubject
     
     sfile = listing(sid);
     disp(['Processing ' sfile.name])
@@ -92,7 +91,7 @@ parfor sid = 1:nsubject
             %baseline = baseline(lhz:hhz, :);
             %signal = fqsignal(lhz:hhz, :);
             %meanband(stimulus, probe) = mean2(signal) / mean2(baseline)
-            meanband(stimulus, probe) = mean2(fqsignal) / mean2(baseline);
+            meanband(stimulus, probe) = mean(mean(fqsignal)) / mean(mean(baseline));
             
         end
     end
@@ -102,7 +101,7 @@ parfor sid = 1:nsubject
     parsave(['../../Data/Intracranial/Processed/' outdata '/' sfile.name], s);
     
     % clear all subject-specific variables
-    %clearvars -except listing indata outdata freqlimits ncycles window w_sta_ms w_end_ms w_sta_t w_end_t
+    clearvars -except listing indata outdata freqlimits ncycles window w_sta_ms w_end_ms w_sta_t w_end_t
     fprintf('\n')
 
 end
