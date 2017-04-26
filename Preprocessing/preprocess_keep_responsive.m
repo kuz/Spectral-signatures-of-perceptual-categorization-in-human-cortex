@@ -26,7 +26,7 @@ for wid = 1:nwin
     for fid = 1:nfreqs
         pID = fdr(results{wid, fid}(:, 3), 0.05);
         ratio = results{wid, fid}(:, 6) ./ results{wid, fid}(:, 5);
-        results{wid, fid}(:, 4) = (ratio > 0.8 & ratio < 1.2) | results{wid, fid}(:, 3) >= pID;
+        results{wid, fid}(:, 4) = results{wid, fid}(:, 3) >= pID;
     end
 end
 

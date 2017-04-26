@@ -29,7 +29,7 @@ for wid = 1:nwin
 end
 
 % for each subject
-for si = 1:2%length(listing)
+for si = 1:length(listing)
     sfile = listing(si);
     disp(['Processing ' num2str(si) ' ' sfile.name])
     
