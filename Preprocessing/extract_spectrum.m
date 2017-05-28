@@ -71,6 +71,11 @@ for probe = 1:nprobes
         [power5, faxis, times, period] = waveletspectrogram(signal', 512, 'freqlimits', [15 29], 'ncycles', 5);
         [power6, faxis, times, period] = waveletspectrogram(signal', 512, 'freqlimits', [30 149], 'ncycles', 6);
 
+        power3 = flipud(power3);
+        power4 = flipud(power4);
+        power5 = flipud(power5);
+        power6 = flipud(power6);
+
         for i = 1:16:768
             ft(stimulus, 1:5,    (i+15)/16) = mean(power3(:, i:i+15), 2);
             ft(stimulus, 6:11,   (i+15)/16) = mean(power4(:, i:i+15), 2);
