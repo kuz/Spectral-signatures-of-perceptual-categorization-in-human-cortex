@@ -25,16 +25,6 @@ for sid, filename in enumerate(filelist):
     for pid in data[()].keys():
         f1_scores[:, pid, sid] = f1_score(data[()][pid]['true'], data[()][pid]['pred'], average=None)
 
-"""
-# plot the distribution of F1 score in each class category
-plt.figure(dpi=100);
-for cid in range(n_classes):
-    plt.subplot(2, 4, cid + 1);
-    plt.hist(np.ravel(f1_scores[cid, :, :][f1_scores[cid, :, :] > 0.0]), 50, facecolor='green', alpha=0.75);
-plt.savefig('%s/Figures/%s' % (OUTDIR, 'LFP_classification_f1_distributions.png'), bbox_inches='tight');
-plt.clf();
-"""
-
 # for every category
 print 'Retraining RFs on full data for successful probes ...'
 for cid in range(n_classes):
@@ -61,7 +51,28 @@ for cid in range(n_classes):
 
         clf = RandomForestClassifier(n_estimators=1000, n_jobs=4)
         clf.fit(data[:, pid, :], stimgroups);
-        feature_importances[i, :] = clf.feature_importances_
+
+        feature_counts = np.zeros(clf.estimators_[0].tree_.n_features)
+        
+        # for each tree in the forest
+        for tid in range(clf.n_estimators):
+        
+            # find leafs that are responsible for the current category
+            leafs = np.where(np.logical_and(clf.estimators_[tid].tree_.feature < 0, clf.estimators_[tid].tree_.value[:, 0, cid] > 0.0))[0]
+            for leaf in leafs:
+
+                # store which nodes led to that leaf
+                path_to_node = []
+                while True:
+                    parent = np.concatenate((np.where(clf.estimators_[tid].tree_.children_left == leaf)[0], np.where(clf.estimators_[tid].tree_.children_right == leaf)[0]))
+                    if len(parent) == 0: break
+                    leaf = parent[0]
+                    path_to_node.append(leaf)
+
+                # increase counts of the features that are splitting features of the found nodes
+                feature_counts[clf.estimators_[tid].tree_.feature[path_to_node]] += 1
+
+        feature_importances[i, :] = feature_counts / np.sum(feature_counts)
         clf = None
     
     # store feature importances
