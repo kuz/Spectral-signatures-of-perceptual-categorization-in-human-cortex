@@ -13,6 +13,7 @@ DATADIR = '../../Data/Intracranial/Processed'
 OUTDIR  = '../../Outcome'
 featureset = 'LFP_8c_artif_bipolar_BA_responsive'
 n_classes = 8
+threshold = 0.5
 
 filelist = os.listdir(INDIR)
 n_subjects = len(filelist)
@@ -31,7 +32,7 @@ for cid in range(n_classes):
     print '\tCategory %d:' % cid
 
     # for every probe that has high F1 score in the given category
-    successful_probes = np.vstack(np.where(f1_scores[cid, :, :] > 0.6)).T
+    successful_probes = np.vstack(np.where(f1_scores[cid, :, :] >= threshold)).T
     n_probes = successful_probes.shape[0]
     feature_importances = np.zeros((n_probes, 768))
 
@@ -77,9 +78,3 @@ for cid in range(n_classes):
     
     # store feature importances
     np.save('%s/Single Probe Classification/LFP/Importances/LFP_feature_importances_ctg%d.npy' % (OUTDIR, cid), feature_importances)
-
-    # plot feature importances
-    plt.plot(np.mean(feature_importances, 0));
-    plt.savefig('%s/Figures/%s' % (OUTDIR, 'LFP_feature_importances_ctg%d.png' % cid), bbox_inches='tight');
-    plt.clf();
-
