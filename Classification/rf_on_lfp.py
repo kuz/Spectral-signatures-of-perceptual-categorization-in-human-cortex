@@ -23,8 +23,6 @@ if permutation:
 else:
     OUTDIR = '../../Outcome/Single Probe Classification/LFP/Predictions'
 
-print OUTDIR
-
 #: Data parameters
 nstim = 401
 n_cv = 5
