@@ -5,7 +5,7 @@ matplotlib.use('Agg')
 from matplotlib import pylab as plt
 import matplotlib.cm as cm
 import scipy.io as sio
-from surfer import Brain
+#from surfer import Brain
 
 # parameters
 INDIR = '../../Outcome/Single Probe Classification/FT/Importances'
@@ -13,12 +13,12 @@ DATADIR = '../../Data/Intracranial/Processed'
 OUTDIR = '../../Outcome/Figures'
 
 # surfer parameters
-subject_id = "fsaverage"
-subjects_dir = os.environ["SUBJECTS_DIR"]
+#subject_id = "fsaverage"
+#subjects_dir = os.environ["SUBJECTS_DIR"]
 
 # lists
 categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
-subjlist = os.listdir('../../Outcome/Single Probe Classification/FT/Predictions')
+subjlist = sorted(os.listdir('../../Outcome/Single Probe Classification/FT/Predictions'))
 n_subjects = len(subjlist)
 
 # separate plot for each category

@@ -8,7 +8,7 @@ import matplotlib.cm as cm
 INDIR = '../../Outcome/Single Probe Classification/LFP/Importances'
 OUTDIR = '../../Outcome/Figures'
 
-fileliest = os.listdir('%s' % INDIR)
+fileliest = sorted(os.listdir('%s' % INDIR))
 categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
 linestyles = ['-', '--', '-.', ':', '-', '--', '-.', ':']
 
