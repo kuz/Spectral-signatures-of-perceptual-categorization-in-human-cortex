@@ -12,7 +12,7 @@ n_classes = 8
 n_freqs = 146
 threshold = 0.5
 
-filelist = os.listdir(INDIR)
+filelist = sorted(os.listdir(INDIR))
 n_subjects = len(filelist)
 
 # build matrix CLASSES x PROBES x SUBJECTS with F1 scores

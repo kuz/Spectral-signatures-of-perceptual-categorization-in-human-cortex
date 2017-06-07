@@ -15,7 +15,7 @@ featureset = 'LFP_8c_artif_bipolar_BA_responsive'
 n_classes = 8
 threshold = 0.5
 
-filelist = os.listdir(INDIR)
+filelist = sorted(os.listdir(INDIR))
 n_subjects = len(filelist)
 
 # build matrix CLASSES x PROBES x SUBJECTS with F1 scores
