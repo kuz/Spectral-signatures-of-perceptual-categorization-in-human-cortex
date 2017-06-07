@@ -28,7 +28,7 @@ for cid, category in enumerate(categories):
     plt.ylabel('Feature importance', size=10);
     plt.title('LFP Feature Importances for Different Image Categories', size=12);
 
-    plt.savefig('%s/LFP_importances_%d_%s_.png' % (OUTDIR, cid, category), bbox_inches='tight');
+    plt.savefig('%s/LFP_importances_%d_%s.png' % (OUTDIR, cid, category), bbox_inches='tight');
     plt.clf();
 
 # all together

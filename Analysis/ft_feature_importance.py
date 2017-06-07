@@ -1,10 +1,6 @@
 import os
 import numpy as np
 from sklearn.metrics import confusion_matrix, f1_score
-import matplotlib
-matplotlib.use('Agg')
-from matplotlib import pylab as plt
-import matplotlib.cm as cm
 import scipy.io as sio
 from sklearn.ensemble import RandomForestClassifier
 
@@ -64,27 +60,38 @@ for cid in range(n_classes):
         clf.fit(signal, stimgroups);
         
         # for each tree in the forest
-        feature_counts = np.zeros(clf.estimators_[0].tree_.n_features)
+        forest_importances = np.zeros(clf.estimators_[0].tree_.n_features)
         for tid in range(clf.n_estimators):
-        
+
+            tree = clf.estimators_[tid].tree_
+            tree_importances = np.zeros(tree.n_features)
+
             # find leafs that are responsible for the current category
-            leafs = np.where(np.logical_and(clf.estimators_[tid].tree_.feature < 0, clf.estimators_[tid].tree_.value[:, 0, cid] > 0.0))[0]
+            leafs = np.where(np.logical_and(tree.feature < 0, tree.value[:, 0, cid] > 0.0))[0]
             for leaf in leafs:
 
                 # store which nodes led to that leaf
                 path_to_node = []
                 while True:
-                    parent = np.concatenate((np.where(clf.estimators_[tid].tree_.children_left == leaf)[0], np.where(clf.estimators_[tid].tree_.children_right == leaf)[0]))
+                    parent = np.concatenate((np.where(tree.children_left == leaf)[0], np.where(tree.children_right == leaf)[0]))
                     if len(parent) == 0: break
                     leaf = parent[0]
                     path_to_node.append(leaf)
 
-                # increase counts of the features that are splitting features of the found nodes
-                feature_counts[clf.estimators_[tid].tree_.feature[path_to_node]] += 1
+                for nid in path_to_node:
+                    fid = tree.feature[nid]
+                    left = tree.children_left[nid]
+                    right = tree.children_right[nid]
+                    tree_importances[fid] += (tree.weighted_n_node_samples[nid] * tree.impurity[nid] -
+                                              tree.weighted_n_node_samples[left] * tree.impurity[left] - 
+                                              tree.weighted_n_node_samples[right] * tree.impurity[right])
+            
+            forest_importances += tree_importances
 
-        feature_importances[i, :, :] = (feature_counts / np.sum(feature_counts)).reshape(146, 48)
+        feature_importances[i, :, :] = (forest_importances / np.sum(forest_importances)).reshape(146, 48)
         clf = None
     
     # store feature importances
     np.save('%s/Single Probe Classification/FT/Importances/FT_feature_importances_ctg%d.npy' % (OUTDIR, cid), feature_importances)
+    np.save('%s/Single Probe Classification/FT/Importances/FT_successful_probes_ctg%d.npy' % (OUTDIR, cid), successful_probes)
 
