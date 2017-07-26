@@ -105,14 +105,6 @@ for cid, category in enumerate(categories):
         plt.close(fig);
 
 
-    # Mono and Poly predictive probes
-    try:
-        os.mkdir('%s/%s/Monopredictive' % (OUTDIR, subdir))
-        os.mkdir('%s/%s/Polypredictive' % (OUTDIR, subdir))
-    except:
-        pass
-    
-
     """
     for ba in np.unique(successful_areas):
 
