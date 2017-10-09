@@ -20,10 +20,50 @@ subjects_dir = os.environ["SUBJECTS_DIR"]
 categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
 subjlist = sorted(os.listdir('../../Outcome/Single Probe Classification/FT/Predictions'))
 n_subjects = len(subjlist)
-scores_spc = np.load('%s/../scores_sid_pid_cat.npy')
+scores_spc = np.load('%s/../scores_sid_pid_cat.npy' % INDIR).item()
 
 # 
 importance_allctg = np.zeros((0, 146, 48))
+
+def triptych(m, foci, title, filenames):
+
+    fig = plt.figure(figsize=(24, 6), dpi=300);
+    plt.subplot(1, 3, 1);
+    plt.imshow(m, interpolation='none', origin='lower', cmap=cm.Blues, aspect='auto');
+    plt.colorbar();
+    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--')
+    plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
+    plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
+    plt.ylabel('Frequency (Hz)', size=10);
+    plt.xlabel('Time (30 ms bin)', size=10);
+    plt.title(title, size=11);
+
+    # 3D mesh
+    plt.subplot(1, 3, 2);
+    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.4, background='white');
+    brain.add_foci(foci, hemi='rh', scale_factor=0.5, color='blue');
+    brain.show_view('m');
+    pic = brain.screenshot()
+    plt.imshow(pic);
+    plt.xlim(0, 800);
+    plt.ylim(800, 0);
+
+    # 3D mesh
+    plt.subplot(1, 3, 3);
+    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.4, background='white');
+    brain.add_foci(foci, hemi='rh', scale_factor=0.5, color='blue');
+    brain.show_view(view=dict(azimuth=0.0, elevation=0), roll=90);
+    pic = brain.screenshot()
+    plt.imshow(pic);
+    plt.xlim(0, 800);
+    plt.ylim(800, 0);
+
+    for filename in filenames:
+        plt.savefig(filename, bbox_inches='tight');
+    plt.clf();
+    plt.close(fig);
+
+
 
 # separate plot for each category
 for cid, category in enumerate(categories):
@@ -49,6 +89,7 @@ for cid, category in enumerate(categories):
     #temporal_weights = np.tile(range(17,48), len(successful_areas)*146).reshape(len(successful_areas), 146, len(range(17,48))) / 47.0
 
     # Plot each probe's importances
+    """
     for i in range(importance.shape[0]):
 
         (pid, sid) = successful_probes[i]
@@ -68,42 +109,33 @@ for cid, category in enumerate(categories):
         except:
             pass
 
-        # figure
-        fig = plt.figure(figsize=(24, 6), dpi=300);
+        triptych(importance[i, :, :], mni,
+                 'Importance of spectrotemporal features for "%s"\nsID: %d   pID: %d   BA: %d' % (categories[cid], sid, pid, area),
+                 ['%s/%s/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, cid, category, sid, pid),
+                  '%s/%s/BA%d/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, area, cid, category, sid, pid),
+                  '%s/%s/Subject%d/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, sid, cid, category, sid, pid)])
+    """
 
-        # feature importances
-        plt.subplot(1, 3, 1);
-        plt.imshow(importance[i, :, :], interpolation='none', origin='lower', cmap=cm.Blues, aspect='auto');
-        plt.colorbar();
-        plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
-        plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
-        plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
-        plt.ylabel('Frequency (Hz)', size=10);
-        plt.xlabel('Time (30 ms bin)', size=10);
-        plt.title('Importance of spectrotemporal features for "%s"\nsID: %d   pID: %d   BA: %d' % (categories[cid], sid, pid, area), size=11);
+    # Mono and Poly predictive probes
+    monoprobes = []
+    polyprobes = []
+    for i, (pid, sid) in enumerate(successful_probes):
+        pid = pid - 1
+        if len(scores_spc[sid][pid]) == 1:
+            monoprobes.append(i)
+        else:
+            polyprobes.append(i)
 
-        # 3D mesh
-        plt.subplot(1, 3, 2);
-        brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.4, background='white');
-        brain.add_foci(mni, hemi='rh', scale_factor=1.0, color='blue');
-        brain.show_view('m');
-        pic = brain.screenshot()
-        plt.imshow(pic);
+    triptych(np.mean(importance[monoprobes, :, :], 0), successful_mnis[monoprobes],
+             'Importance of spectrotemporal features for "%s"\nmean over %d monopredictive probes' % (categories[cid], len(monoprobes)),
+             ['%s/%s/FT_importances_%d_%s_MONO_MEAN.png' % (OUTDIR, subdir, cid, category)])
+    print 'BAs: ', successful_areas[monoprobes]
 
-        # 3D mesh
-        plt.subplot(1, 3, 3);
-        brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.4, background='white');
-        brain.add_foci(mni, hemi='rh', scale_factor=1.0, color='blue');
-        brain.show_view(view=dict(azimuth=0.0, elevation=0), roll=90);
-        pic = brain.screenshot()
-        plt.imshow(pic);
-        
-        plt.savefig('%s/%s/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, cid, category, sid, pid), bbox_inches='tight');
-        plt.savefig('%s/%s/BA%d/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, area, cid, category, sid, pid), bbox_inches='tight');
-        plt.savefig('%s/%s/Subject%d/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, sid, cid, category, sid, pid), bbox_inches='tight');
-        plt.clf();
-        plt.close(fig);
-
+    triptych(np.mean(importance[polyprobes, :, :], 0), successful_mnis[polyprobes],
+             'Importance of spectrotemporal features for "%s"\nmean over %d polypredictive probes' % (categories[cid], len(polyprobes)),
+             ['%s/%s/FT_importances_%d_%s_POLY_MEAN.png' % (OUTDIR, subdir, cid, category)])
+    print 'BAs: ', successful_areas[polyprobes]
+    
 
     """
     for ba in np.unique(successful_areas):
@@ -139,71 +171,16 @@ for cid, category in enumerate(categories):
     """
 
     # Mean over each BA
-    for ba in np.unique(successful_areas):
-    
-        fig = plt.figure(figsize=(24, 6), dpi=300);
-        plt.subplot(1, 3, 1);
-        plt.imshow(np.mean(importance[successful_areas == ba, :, :], 0), interpolation='none', origin='lower', cmap=cm.Blues, aspect='auto');
-        plt.colorbar();
-        plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--')
-        plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
-        plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
-        plt.ylabel('Frequency (Hz)', size=10);
-        plt.xlabel('Time (30 ms bin)', size=10);
-        plt.title('Importance of spectrotemporal features for "%s"\nmean over %d probes in BA%d' % (categories[cid], np.sum(successful_areas == ba), ba), size=11);
-
-        # 3D mesh
-        plt.subplot(1, 3, 2);
-        brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.4, background='white');
-        brain.add_foci(successful_mnis[successful_areas == ba], hemi='rh', scale_factor=0.5, color='blue');
-        brain.show_view('m');
-        pic = brain.screenshot()
-        plt.imshow(pic);
-
-        # 3D mesh
-        plt.subplot(1, 3, 3);
-        brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.4, background='white');
-        brain.add_foci(successful_mnis[successful_areas == ba], hemi='rh', scale_factor=0.5, color='blue');
-        brain.show_view(view=dict(azimuth=0.0, elevation=0), roll=90);
-        pic = brain.screenshot()
-        plt.imshow(pic);
-
-        plt.savefig('%s/%s/FT_importances_%d_%s_MEAN_BA%d.png' % (OUTDIR, subdir, cid, category, ba), bbox_inches='tight');
-        plt.clf();
-        plt.close(fig);
-
+    """
+    for ba in np.unique(successful_areas):    
+        triptych(np.mean(importance[successful_areas == ba, :, :], 0), successful_mnis[successful_areas == ba],
+                 'Importance of spectrotemporal features for "%s"\nmean over %d probes in BA%d' % (categories[cid], np.sum(successful_areas == ba), ba),
+                 ['%s/%s/FT_importances_%d_%s_MEAN_BA%d.png' % (OUTDIR, subdir, cid, category, ba)])
+    """
 
     # Mean over all whole category
-    fig = plt.figure(figsize=(24, 6), dpi=300);
-    plt.subplot(1, 3, 1);
-    plt.imshow(np.mean(importance, 0), interpolation='none', origin='lower', cmap=cm.Blues, aspect='auto');
-    plt.colorbar();
-    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--')
-    plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
-    plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
-    plt.ylabel('Frequency (Hz)', size=10);
-    plt.xlabel('Time (30 ms bin)', size=10);
-    plt.title('Importance of spectrotemporal features for "%s"' % categories[cid], size=11);
-
-    # 3D mesh: 
-    plt.subplot(1, 3, 2);
-    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.4, background='white');
-    #brain.show_view(view=dict(azimuth=152.88, elevation=65.94), roll=101.58);
-    brain.add_foci(successful_mnis, hemi='rh', scale_factor=0.5, color='blue');
-    brain.show_view('m');
-    pic = brain.screenshot()
-    plt.imshow(pic);
-
-    # 3D mesh: 
-    plt.subplot(1, 3, 3);
-    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.4, background='white');
-    #brain.show_view(view=dict(azimuth=152.88, elevation=65.94), roll=101.58);
-    brain.add_foci(successful_mnis, hemi='rh', scale_factor=0.5, color='blue');
-    brain.show_view(view=dict(azimuth=0.0, elevation=0), roll=90);
-    pic = brain.screenshot()
-    plt.imshow(pic);
-
-    plt.savefig('%s/FT_importances_%d_%s_MEAN.png' % (OUTDIR, cid, category), bbox_inches='tight');
-    plt.clf();
-    plt.close(fig);
-    
+    """
+    triptych(np.mean(importance, 0), successful_mnis,
+             'Importance of spectrotemporal features for "%s"' % categories[cid],
+             ['%s/FT_importances_%d_%s_MEAN.png' % (OUTDIR, cid, category)])
+    """
