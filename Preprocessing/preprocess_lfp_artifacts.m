@@ -7,6 +7,11 @@ end
 
 % paramters
 outdata = [indata '_artif'];
+if exist(['../../Data/Intracranial/Processed/' outdata], 'dir') == 7
+    disp(['WARNING: Directory exists: ' outdata])
+else
+    mkdir(['../../Data/Intracranial/Processed/' outdata])
+end
 threshold = 10.0;
 
 % load subject list

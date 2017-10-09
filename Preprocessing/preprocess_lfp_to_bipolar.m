@@ -8,6 +8,11 @@ end
 
 % parameters
 outdata = [indata '_bipolar'];
+if exist(['../../Data/Intracranial/Processed/' outdata], 'dir') == 7
+    disp(['WARNING: Directory exists: ' outdata])
+else
+    mkdir(['../../Data/Intracranial/Processed/' outdata])
+end
 
 % load subject list
 listing = dir(['../../Data/Intracranial/Processed/' indata '/*.mat']);

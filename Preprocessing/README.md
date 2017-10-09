@@ -1,6 +1,6 @@
 ## Order of execution
 
-1. `matlab -nojvm -nodisplay -nosplash -r "structured_to_processed.m; exit"` to extract chunks of LFP recordings for each of the stimuli.  
+1. `matlab -nojvm -nodisplay -nosplash -r "structured_to_processed; exit"` to extract chunks of LFP recordings for each of the stimuli.  
 2. Drop trials with artifacts: `matlab -nojvm -nodisplay -nosplash -r "indata = 'LFP_8c'; preprocess_lfp_artifacts; exit"`  
 3. Bipolar referencing: `matlab -nojvm -nodisplay -nosplash -r "indata = 'LFP_8c_artif'; preprocess_lfp_to_bipolar; exit"`  
 4. Supply with area number: `matlab -nojvm -nodisplay -nosplash -r "indata = 'LFP_8c_artif_bipolar'; preprocess_add_area; exit"`  
