@@ -12,7 +12,7 @@ INDIR  = '../../Outcome/Single Probe Classification/FT/Permutation'
 OUTDIR = '../../Outcome'
 n_classes = 8
 
-filelist = os.listdir(INDIR)
+filelist = sorted(os.listdir(INDIR))
 n_subjects = len(filelist)
 
 # build matrix CLASSES x PROBES x SUBJECTS with F1 scores
@@ -23,9 +23,10 @@ for sid, filename in enumerate(filelist):
     for pid in data[()].keys():
         f1_scores[:, pid, sid] = f1_score(data[()][pid]['true'], data[()][pid]['pred'], average=None)
 
-plt.figure(dpi=100);
-plt.hist(np.ravel(f1_scores[f1_scores > 0.0]), 50, facecolor='green', alpha=0.75);
-plt.savefig('%s/Figures/%s' % (OUTDIR, 'FT_classification_f1_distribution.png'), bbox_inches='tight');
-plt.clf();
+print 'Out of 11293 x 8 permutations the highest F1 score was %.4f' % np.max(f1_scores)
+print 'Threshold for 0.00001 significance (99.999 percentile) is %.6f' % np.percentile(np.ravel(f1_scores[f1_scores > 0.0]), 99.999)
 
-print 'Out of 11293 permutations the highest F1 score was %.4f' % np.max(f1_scores)
+#plt.figure(dpi=100);
+#plt.hist(np.ravel(f1_scores[f1_scores > 0.0]), 50, facecolor='green', alpha=0.75);
+#plt.savefig('%s/Figures/%s' % (OUTDIR, 'FT_classification_f1_distribution.png'), bbox_inches='tight');
+#plt.clf();
