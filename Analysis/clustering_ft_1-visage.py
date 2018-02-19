@@ -41,7 +41,7 @@ def triptych(d, fname, title):
     plt.clf();
     plt.close(fig);
 
-cid = 0
+cid = 1
 print '--- Working on "%s" category ---' % categories[cid]
 
 # which stimuli belong to [cid] caterory
@@ -69,8 +69,12 @@ X[X > 0.0] =  2.0
 X[X < 0.0] = -2.0
 
 # cluster using ward linkage was better for this case as it better covers class diversity
-Z = hierarchy.linkage(X, 'ward', 'euclidean');
-cluster_labels = hierarchy.fcluster(Z, 6, criterion='maxclust')
+Z = hierarchy.linkage(X, 'complete', 'cosine');
+cluster_labels = hierarchy.fcluster(Z, 9, criterion='maxclust')
+
+# manually merge clusters based on observations
+cluster_labels[cluster_labels == 8] = 1
+cluster_labels[cluster_labels == 6] = 3
 
 successful_probes = np.load('%s/%s' % (INDIR, 'FT_successful_probes_ctg%d.npy' % cid))
 successful_areas = np.load('%s/%s' % (INDIR, 'FT_successful_areas_ctg%d.npy' % cid))
@@ -83,7 +87,6 @@ np.save('%s/Clustering/%d-%s/important_activity_patterns.npy' % (OUTDIR, cid, ca
 # print out BAs per cluster
 for cluster_id in np.unique(cluster_labels):
     print 'Cluster %d:' % cluster_id, np.unique(successful_areas[cluster_labels == cluster_id])
-
 
 if draw:
 

@@ -29,7 +29,8 @@ def safemkdir(path):
 # plot definition
 def triptych(d, fname, title):
     fig = plt.figure(figsize=(8, 6), dpi=300);
-    plt.imshow(d, interpolation='none', origin='lower', cmap=cm.bwr, aspect='auto', vmin=-3.0, vmax=3.0);
+    vlim = np.max([np.abs(np.min(d)), np.abs(np.max(d))]) * 2.0
+    plt.imshow(d, interpolation='none', origin='lower', cmap=cm.bwr, aspect='auto', vmin=-vlim, vmax=vlim);
     plt.colorbar();
     plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
     plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
@@ -41,7 +42,7 @@ def triptych(d, fname, title):
     plt.clf();
     plt.close(fig);
 
-cid = 0
+cid = 7
 print '--- Working on "%s" category ---' % categories[cid]
 
 # which stimuli belong to [cid] caterory
@@ -52,7 +53,6 @@ importance = np.load('%s/%s' % (INDIR, 'FT_feature_importances_ctg%d.npy' % cid)
 
 # load list of successfull probes in [cid] category
 successful_probes = np.load('%s/%s' % (INDIR, 'FT_successful_probes_ctg%d.npy' % cid))
-print "Number of successful probes: %d" % (successful_probes.shape[0])
 
 # extract activity (baseline normalized power) of the activyt of succesful probes masked by feature importance
 important_activity_patterns = np.zeros(importance.shape)
@@ -69,11 +69,15 @@ X[X > 0.0] =  2.0
 X[X < 0.0] = -2.0
 
 # cluster using ward linkage was better for this case as it better covers class diversity
-Z = hierarchy.linkage(X, 'ward', 'euclidean');
-cluster_labels = hierarchy.fcluster(Z, 6, criterion='maxclust')
+Z = hierarchy.linkage(X, 'complete', 'cosine');
+cluster_labels = hierarchy.fcluster(Z, 8, criterion='maxclust')
+
+# manually merge clusters based on observations
+cluster_labels[cluster_labels ==  4] = 1
 
 successful_probes = np.load('%s/%s' % (INDIR, 'FT_successful_probes_ctg%d.npy' % cid))
 successful_areas = np.load('%s/%s' % (INDIR, 'FT_successful_areas_ctg%d.npy' % cid))
+print "Number of successful probes: %d" % (successful_probes.shape[0])
 
 # store mapping of successful probes to clusters
 safemkdir('%s/Clustering/%d-%s' % (OUTDIR, cid, categories[cid]))
@@ -83,7 +87,6 @@ np.save('%s/Clustering/%d-%s/important_activity_patterns.npy' % (OUTDIR, cid, ca
 # print out BAs per cluster
 for cluster_id in np.unique(cluster_labels):
     print 'Cluster %d:' % cluster_id, np.unique(successful_areas[cluster_labels == cluster_id])
-
 
 if draw:
 
