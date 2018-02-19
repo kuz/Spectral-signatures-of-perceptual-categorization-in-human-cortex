@@ -18,8 +18,7 @@ subject_id = "fsaverage"
 subjects_dir = os.environ["SUBJECTS_DIR"]
 
 # lists
-#categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
-categories = ['house']
+categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
 subjlist = sorted(os.listdir('../../Outcome/Single Probe Classification/FT/Predictions'))
 n_subjects = len(subjlist)
 scores_spc = np.load('%s/../scores_sid_pid_cat.npy' % INDIR).item()
@@ -46,11 +45,15 @@ def cluster_mean(activity, title, cluster_color):
     plt.close(fig);
 
 
-def quadriptych(importances, foci, foci_colors, title, filenames):
+def quadriptych(importances, foci, foci_colors, cluster_means, title, filenames):
+    
+    fig = plt.figure(figsize=(40, 8), dpi=300);
+    vlim = np.max([np.abs(np.min(cluster_means)), np.abs(np.max(cluster_means))]) * 1.2
 
-    fig = plt.figure(figsize=(32, 6), dpi=300);
-    plt.subplot(1, 5, 1);
-    plt.imshow(importances, interpolation='none', origin='lower', cmap=cm.Blues, extent=(0, 100, 0, 100), aspect='equal');
+    # overall importances
+    #plt.subplot(1, 5, 1);
+    ax1 = plt.subplot2grid((2, 8), (0, 0), colspan=2, rowspan=2)
+    plt.imshow(importances, interpolation='none', origin='lower', cmap=cm.Blues, aspect='auto');
     plt.colorbar();
     plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--')
     plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
@@ -59,20 +62,49 @@ def quadriptych(importances, foci, foci_colors, title, filenames):
     plt.xlabel('Time (30 ms bin)', size=10);
     plt.title(title, size=11);
 
-    plt.subplot(2, 5, 2);
-    plt.imshow(importances, interpolation='none', origin='lower', cmap=cm.Blues, aspect=0.3);
-    plt.subplot(2, 5, 3);
-    plt.imshow(importances, interpolation='none', origin='lower', cmap=cm.Blues, aspect=0.3);
-    plt.subplot(2, 5, 7);
-    plt.imshow(importances, interpolation='none', origin='lower', cmap=cm.Blues, aspect=0.3);
-    plt.subplot(2, 5, 8);
-    plt.imshow(importances, interpolation='none', origin='lower', cmap=cm.Blues, aspect=0.3);
+    # 4 most prominents clusters of activity under the important regions
+    #plt.subplot(2, 5, 2);
+    ax2 = plt.subplot2grid((2, 8), (0, 2))
+    plt.imshow(cluster_means[0], interpolation='none', origin='lower', cmap=cm.bwr, aspect=0.3, vmin=-vlim, vmax=vlim);
+    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
+    plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
+    plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
+    plt.ylabel('Frequency (Hz)', size=10);
+    plt.title('Mean activity of YELLOW electrodes (%d)', size=11, color='yellow');
+
+    #plt.subplot(2, 5, 3);
+    ax1 = plt.subplot2grid((2, 8), (0, 3))
+    plt.imshow(cluster_means[1], interpolation='none', origin='lower', cmap=cm.bwr, aspect=0.3, vmin=-vlim, vmax=vlim);
+    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
+    plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
+    plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
+    plt.title('Mean activity of BLUE electrodes', size=11, color='blue');
+
+    #plt.subplot(2, 5, 7);
+    ax1 = plt.subplot2grid((2, 8), (1, 2))
+    plt.imshow(cluster_means[2], interpolation='none', origin='lower', cmap=cm.bwr, aspect=0.3, vmin=-vlim, vmax=vlim);
+    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
+    plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
+    plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
+    plt.ylabel('Frequency (Hz)', size=10);
+    plt.xlabel('Time (30 ms bin)', size=10);
+    plt.title('Mean activity of RED electrodes', size=11, color='red');
+
+    #plt.subplot(2, 5, 8);
+    ax1 = plt.subplot2grid((2, 8), (1, 3))
+    plt.imshow(cluster_means[3], interpolation='none', origin='lower', cmap=cm.bwr, aspect=0.3, vmin=-vlim, vmax=vlim);
+    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
+    plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
+    plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
+    plt.xlabel('Time (30 ms bin)', size=10);
+    plt.title('Mean activity of BLACK electrodes', size=11, color='black');
 
     # 3D mesh
-    plt.subplot(1, 5, 4);
-    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.4, background='white');
+    #plt.subplot(1, 5, 4);
+    ax1 = plt.subplot2grid((2, 8), (0, 4), colspan=2, rowspan=2)
+    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.1, background='white');
     for color in np.unique(foci_colors):
-        brain.add_foci(foci[foci_colors==color, :], hemi='rh', scale_factor=0.5, color=color);
+        brain.add_foci(foci[foci_colors==color, :], hemi='rh', scale_factor=0.6, color=color);
     brain.show_view('m');
     pic = brain.screenshot()
     plt.imshow(pic);
@@ -80,15 +112,18 @@ def quadriptych(importances, foci, foci_colors, title, filenames):
     plt.ylim(800, 0);
 
     # 3D mesh
-    plt.subplot(1, 5, 5);
-    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.4, background='white');
+    #plt.subplot(1, 5, 5);
+    ax1 = plt.subplot2grid((2, 8), (0, 6), colspan=2, rowspan=2)
+    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.1, background='white');
     for color in np.unique(foci_colors):
-        brain.add_foci(foci[foci_colors==color, :], hemi='rh', scale_factor=0.5, color=color);
+        brain.add_foci(foci[foci_colors==color, :], hemi='rh', scale_factor=0.6, color=color);
     brain.show_view(view=dict(azimuth=0.0, elevation=0), roll=90);
     pic = brain.screenshot()
     plt.imshow(pic);
     plt.xlim(0, 800);
     plt.ylim(800, 0);
+
+    #plt.tight_layout()
 
     for filename in filenames:
         plt.savefig(filename, bbox_inches='tight');
@@ -112,24 +147,32 @@ for cid, category in enumerate(categories):
 
     # four most important clusters' sample means
     # here we manually specify for every category which cluster ID's are the most important ones
-    important_clusters_per_cid = {
+    important_clusters = {
         0: [1, 4, 5, 6],
-        1: [],
-        2: [],
-        3: [],
-        4: [],
-        5: [],
-        6: [],
-        7: []
+        1: [1, 2, 3, 7],
+        2: [1, 3, 6, 10],
+        3: [1, 2, 3, 4],
+        4: [1, 2, 5, 9],
+        5: [1, 2, 8, 9],
+        6: [1, 5, 9, 10],
+        7: [1, 2, 3, 5]
     }
-    important_clusters = important_clusters_per_cid[cid]
+
 
     # Category mean, 4 clusters, locations
-    #colors = np.array(['blue' for x in range(successful_mnis.shape[0])])
-    colors = np.array(['blue' for x in range(23)] + ['green' for x in range(23)])
-    quadriptych(np.mean(importance, 0), successful_mnis, colors,
+    colors = ['whitesmoke', 'yellow', 'blue', 'red', 'black']
+    cluster_means = np.zeros((4, important_activity_patterns.shape[1], important_activity_patterns.shape[2]))
+    cluster_color_ids = np.array([0 for x in range(len(cluster_labels))])
+    for i in range(4):
+        cluster_means[i] = np.mean(important_activity_patterns[cluster_labels == important_clusters[cid][i]], axis=0)
+        cluster_color_ids[cluster_labels == important_clusters[cid][i]] = i + 1
+
+    foci_colors = np.array([colors[i] for i in cluster_color_ids])
+    quadriptych(np.mean(importance, 0), successful_mnis, foci_colors, cluster_means,
                 'Importance of spectrotemporal features for "%s"' % categories[cid],
                 ['%s/FT_importances_%d_%s_MEAN.png' % (OUTDIR, cid, category)])
+
+
 
     # importance in time
     #most_important_moment = np.argmax(np.sum(importance[:, :, :], axis=1), axis=1)
