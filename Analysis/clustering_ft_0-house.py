@@ -52,6 +52,7 @@ importance = np.load('%s/%s' % (INDIR, 'FT_feature_importances_ctg%d.npy' % cid)
 
 # load list of successfull probes in [cid] category
 successful_probes = np.load('%s/%s' % (INDIR, 'FT_successful_probes_ctg%d.npy' % cid))
+print "Number of successful probes: %d" % (successful_probes.shape[0])
 
 # extract activity (baseline normalized power) of the activyt of succesful probes masked by feature importance
 important_activity_patterns = np.zeros(importance.shape)
@@ -72,17 +73,22 @@ Z = hierarchy.linkage(X, 'ward', 'euclidean');
 cluster_labels = hierarchy.fcluster(Z, 6, criterion='maxclust')
 
 successful_probes = np.load('%s/%s' % (INDIR, 'FT_successful_probes_ctg%d.npy' % cid))
+successful_areas = np.load('%s/%s' % (INDIR, 'FT_successful_areas_ctg%d.npy' % cid))
 
 # store mapping of successful probes to clusters
 safemkdir('%s/Clustering/%d-%s' % (OUTDIR, cid, categories[cid]))
 np.save('%s/Clustering/%d-%s/successful_probes_to_cluster_labels.npy' % (OUTDIR, cid, categories[cid]), cluster_labels)
 np.save('%s/Clustering/%d-%s/important_activity_patterns.npy' % (OUTDIR, cid, categories[cid]), important_activity_patterns)
 
+# print out BAs per cluster
+for cluster_id in np.unique(cluster_labels):
+    print 'Cluster %d:' % cluster_id, np.unique(successful_areas[cluster_labels == cluster_id])
+
 
 if draw:
 
     # draw cluster means
-    print "Drwing cluster means..."
+    print "Drawing cluster means..."
     for cluster_id in np.unique(cluster_labels):
         safemkdir('%s/Figures/Clustering/%d-%s' % (OUTDIR, cid, categories[cid]))
         triptych(np.mean(important_activity_patterns[cluster_labels == cluster_id], axis=0),

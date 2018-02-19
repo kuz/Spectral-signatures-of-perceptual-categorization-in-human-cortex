@@ -29,7 +29,8 @@ def safemkdir(path):
 # plot definition
 def triptych(d, fname, title):
     fig = plt.figure(figsize=(8, 6), dpi=300);
-    plt.imshow(d, interpolation='none', origin='lower', cmap=cm.bwr, aspect='auto', vmin=-3.0, vmax=3.0);
+    vlim = np.max([np.abs(np.min(d)), np.abs(np.max(d))]) * 2.0
+    plt.imshow(d, interpolation='none', origin='lower', cmap=cm.bwr, aspect='auto', vmin=-vlim, vmax=vlim);
     plt.colorbar();
     plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
     plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
@@ -41,7 +42,7 @@ def triptych(d, fname, title):
     plt.clf();
     plt.close(fig);
 
-cid = 1
+cid = 6
 print '--- Working on "%s" category ---' % categories[cid]
 
 # which stimuli belong to [cid] caterory
@@ -70,11 +71,15 @@ X[X < 0.0] = -2.0
 
 # cluster using ward linkage was better for this case as it better covers class diversity
 Z = hierarchy.linkage(X, 'complete', 'cosine');
-cluster_labels = hierarchy.fcluster(Z, 9, criterion='maxclust')
+cluster_labels = hierarchy.fcluster(Z, 13, criterion='maxclust')
 
 # manually merge clusters based on observations
-cluster_labels[cluster_labels == 8] = 1
-cluster_labels[cluster_labels == 6] = 3
+cluster_labels[cluster_labels ==  3] = 1
+cluster_labels[cluster_labels ==  4] = 1
+cluster_labels[cluster_labels ==  6] = 5
+cluster_labels[cluster_labels == 13] = 9
+cluster_labels[cluster_labels == 11] = 10
+cluster_labels[cluster_labels == 12] = 10
 
 successful_probes = np.load('%s/%s' % (INDIR, 'FT_successful_probes_ctg%d.npy' % cid))
 successful_areas = np.load('%s/%s' % (INDIR, 'FT_successful_areas_ctg%d.npy' % cid))
