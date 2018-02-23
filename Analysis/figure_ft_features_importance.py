@@ -5,7 +5,9 @@ matplotlib.use('Agg')
 from matplotlib import pylab as plt
 import matplotlib.cm as cm
 import scipy.io as sio
+from scipy.stats import mannwhitneyu
 from surfer import Brain
+import pdb
 
 # parameters
 INDIR = '../../Outcome/Single Probe Classification/FT/Importances'
@@ -15,7 +17,7 @@ OUTDIR = '../../Outcome/Figures'
 
 # surfer parameters
 subject_id = "fsaverage"
-subjects_dir = os.environ["SUBJECTS_DIR"]
+#subjects_dir = os.environ["SUBJECTS_DIR"]
 
 # lists
 categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
@@ -45,7 +47,7 @@ def cluster_mean(activity, title, cluster_color):
     plt.close(fig);
 
 
-def quadriptych(importances, foci, foci_colors, cluster_means, title, filenames):
+def quadriptych(importances, foci, foci_colors, cluster_means, cluster_predictive_score, title, filenames):
     
     fig = plt.figure(figsize=(40, 8), dpi=300);
     vlim = np.max([np.abs(np.min(cluster_means)), np.abs(np.max(cluster_means))]) * 1.2
@@ -70,7 +72,7 @@ def quadriptych(importances, foci, foci_colors, cluster_means, title, filenames)
     plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
     plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
     plt.ylabel('Frequency (Hz)', size=10);
-    plt.title('Mean activity of YELLOW electrodes (%d)', size=11, color='yellow');
+    plt.title('Mean activity of YELLOW electrodes\nF1 score = %.4f' % cluster_predictive_score[0], size=11, color='yellow');
 
     #plt.subplot(2, 5, 3);
     ax1 = plt.subplot2grid((2, 8), (0, 3))
@@ -78,7 +80,7 @@ def quadriptych(importances, foci, foci_colors, cluster_means, title, filenames)
     plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
     plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
     plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
-    plt.title('Mean activity of BLUE electrodes', size=11, color='blue');
+    plt.title('Mean activity of BLUE electrodes\nF1 score = %.4f' % cluster_predictive_score[1], size=11, color='blue');
 
     #plt.subplot(2, 5, 7);
     ax1 = plt.subplot2grid((2, 8), (1, 2))
@@ -88,7 +90,7 @@ def quadriptych(importances, foci, foci_colors, cluster_means, title, filenames)
     plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
     plt.ylabel('Frequency (Hz)', size=10);
     plt.xlabel('Time (30 ms bin)', size=10);
-    plt.title('Mean activity of RED electrodes', size=11, color='red');
+    plt.title('Mean activity of RED electrodes\nF1 score = %.4f' % cluster_predictive_score[2], size=11, color='red');
 
     #plt.subplot(2, 5, 8);
     ax1 = plt.subplot2grid((2, 8), (1, 3))
@@ -97,7 +99,7 @@ def quadriptych(importances, foci, foci_colors, cluster_means, title, filenames)
     plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
     plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
     plt.xlabel('Time (30 ms bin)', size=10);
-    plt.title('Mean activity of BLACK electrodes', size=11, color='black');
+    plt.title('Mean activity of BLACK electrodes\nF1 score = %.4f' % cluster_predictive_score[3], size=11, color='black');
 
     # 3D mesh
     #plt.subplot(1, 5, 4);
@@ -162,15 +164,40 @@ for cid, category in enumerate(categories):
     # Category mean, 4 clusters, locations
     colors = ['whitesmoke', 'yellow', 'blue', 'red', 'black']
     cluster_means = np.zeros((4, important_activity_patterns.shape[1], important_activity_patterns.shape[2]))
+    cluster_predictive_score = np.zeros((4,))
     cluster_color_ids = np.array([0 for x in range(len(cluster_labels))])
+    cluster_probe_f1_scores = {0: [], 1: [], 2: [], 3: []}
     for i in range(4):
+
+        # compute cluster's mean activity
         cluster_means[i] = np.mean(important_activity_patterns[cluster_labels == important_clusters[cid][i]], axis=0)
+
+        # computer cluster's average predictive score (over probes in the cluster)
+        sum_scores = 0
+        ind_scores = []
+        for succ_pid, succ_sid in successful_probes[cluster_labels == important_clusters[cid][i]]:
+            succ_pid -= 1
+            sum_scores += scores_spc[succ_sid][succ_pid][cid]
+            cluster_probe_f1_scores[i].append(scores_spc[succ_sid][succ_pid][cid])
+        cluster_predictive_score[i] = sum_scores / successful_probes[cluster_labels == important_clusters[cid][i]].shape[0]
+
+        # assign color
         cluster_color_ids[cluster_labels == important_clusters[cid][i]] = i + 1
 
+    # difference significance
+    diff_pvalue_matrix = np.zeros((4, 4))
+    for i in range(4):
+        for j in range(4):
+            diff_pvalue_matrix[i, j] = mannwhitneyu(cluster_probe_f1_scores[i], cluster_probe_f1_scores[j])[1] * (8*16)
+    
+    np.set_printoptions(precision=6, suppress=True)
+    print diff_pvalue_matrix
+    print ""
+
     foci_colors = np.array([colors[i] for i in cluster_color_ids])
-    quadriptych(np.mean(importance, 0), successful_mnis, foci_colors, cluster_means,
-                'Importance of spectrotemporal features for "%s"' % categories[cid],
-                ['%s/FT_importances_%d_%s_MEAN.png' % (OUTDIR, cid, category)])
+    #quadriptych(np.mean(importance, 0), successful_mnis, foci_colors, cluster_means, cluster_predictive_score, 
+    #            'Importance of spectrotemporal features for "%s"' % categories[cid],
+    #            ['%s/FT_importances_%d_%s_MEAN.png' % (OUTDIR, cid, category)])
 
 
 
