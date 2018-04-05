@@ -8,7 +8,9 @@ import scipy.io as sio
 from scipy.cluster import hierarchy
 
 # parameters
-draw = False
+draw_clusters = True
+draw_individual = False
+
 INDIR = '../../Outcome/Single Probe Classification/FT/Importances'
 DATADIR = '../../Data/Intracranial/Processed'
 OUTDIR = '../../Outcome'
@@ -27,12 +29,20 @@ def safemkdir(path):
         pass
 
 # plot definition
-def triptych(d, fname, title):
+def triptych(d, fname, title, lines=True):
     fig = plt.figure(figsize=(8, 6), dpi=300);
     vlim = np.max([np.abs(np.min(d)), np.abs(np.max(d))]) * 2.0
     plt.imshow(d, interpolation='none', origin='lower', cmap=cm.bwr, aspect='auto', vmin=-vlim, vmax=vlim);
     plt.colorbar();
     plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
+    if lines:
+        plt.axvline(x=19, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
+        plt.axvline(x=24, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
+        plt.axvline(x=32, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
+        plt.axhline(y=4, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
+        plt.axhline(y=10, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
+        plt.axhline(y=27, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
+        plt.axhline(y=56, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
     plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
     plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
     plt.ylabel('Frequency (Hz)', size=10);
@@ -89,21 +99,23 @@ np.save('%s/Clustering/%d-%s/important_activity_patterns.npy' % (OUTDIR, cid, ca
 for cluster_id in np.unique(cluster_labels):
     print 'Cluster %d:' % cluster_id, np.unique(successful_areas[cluster_labels == cluster_id])
 
-if draw:
+if draw_clusters:
 
     # draw cluster means
     print "Drawing cluster means..."
     for cluster_id in np.unique(cluster_labels):
         safemkdir('%s/Figures/Clustering/%d-%s' % (OUTDIR, cid, categories[cid]))
         triptych(np.mean(important_activity_patterns[cluster_labels == cluster_id], axis=0),
-                 '%s/Figures/Clustering/%d-%s/Class-%d' % (OUTDIR, cid, categories[cid], cluster_id),
+                 '%s/Figures/Clustering/%d-%s/Cluster-%d' % (OUTDIR, cid, categories[cid], cluster_id),
                  'Cluster %d mean on "%s" category' % (cluster_id, categories[cid]))
+
+if draw_individual:
 
     # draw individual samples grouped into clusters
     print "Particular instances..."
-    for i in range(successful_probes.shape[0]):
+    for i, (pid, sid) in enumerate(successful_probes):
         print "\t%d/%d" % (i + 1, successful_probes.shape[0])
         safemkdir('%s/Figures/Clustering/%d-%s/C%d' % (OUTDIR, cid, categories[cid], cluster_labels[i]))
         triptych(important_activity_patterns[i],
-                 '%s/Figures/Clustering/%d-%s/C%d/%d' % (OUTDIR, cid, categories[cid], cluster_labels[i], i),
-                 'Response of succ. probe %d to "%s"' % (i, categories[cid]))
+                 '%s/Figures/Clustering/%d-%s/C%d/s%d-p%d' % (OUTDIR, cid, categories[cid], cluster_labels[i], sid, pid),
+                 'Response of succ. probe s%d-p%d to "%s"' % (sid, pid, categories[cid]))
