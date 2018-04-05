@@ -4,7 +4,7 @@ import numpy as np
 # parameters
 INDIR = '../../Outcome/Single Probe Classification/FT/Importances'
 
-# a) Visual Word Form
+# Visual Word Form Area
 '''cid = 7
 left_x = [-50, -38]
 left_y = [-61, -50]
@@ -13,14 +13,23 @@ right_x = [ 0, 0]
 right_y = [ 0, 0]
 right_z = [ 0, 0]'''
 
-# a) Fusiform Face Form
-cid = 7
+# Fusiform Face Area
+'''cid = 7
 left_x =  [-44, -38]
 left_y =  [-61, -50]
 left_z =  [-24, -15]
 right_x = [ 36,  43]
 right_y = [-55, -49]
-right_z = [-25, -13]
+right_z = [-25, -13]'''
+
+# Parahippocampal Place Area
+cid = 7
+left_x =  [-31, -22]
+left_y =  [-55, -49]
+left_z =  [-12,  -6]
+right_x = [ 21,  32]
+right_y = [-54, -45]
+right_z = [-12,  -6]
 
 # load probe data for the given category
 successful_probes = np.load('%s/%s' % (INDIR, 'FT_successful_probes_ctg%d.npy' % cid))
