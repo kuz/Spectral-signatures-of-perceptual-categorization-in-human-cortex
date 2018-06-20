@@ -86,8 +86,6 @@ cluster_labels = hierarchy.fcluster(Z, 6, criterion='maxclust')
 successful_probes = np.load('%s/%s' % (INDIR, 'FT_successful_probes_ctg%d.npy' % cid))
 successful_areas = np.load('%s/%s' % (INDIR, 'FT_successful_areas_ctg%d.npy' % cid))
 
-pdb.set_trace()
-
 # store mapping of successful probes to clusters
 safemkdir('%s/Clustering/%d-%s' % (OUTDIR, cid, categories[cid]))
 np.save('%s/Clustering/%d-%s/successful_probes_to_cluster_labels.npy' % (OUTDIR, cid, categories[cid]), cluster_labels)

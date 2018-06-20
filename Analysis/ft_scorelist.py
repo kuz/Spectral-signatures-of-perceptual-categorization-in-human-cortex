@@ -2,14 +2,15 @@ import os
 import numpy as np
 from sklearn.metrics import f1_score
 
-INDIR   = '../../Outcome/Single Probe Classification/FT/Predictions'
-OUTDIR  = '../../Outcome/Single Probe Classification/FT'
+FREQSET = 'lowfreq'
+INDIR   = '../../Outcome/Single Probe Classification/%s/Predictions' % FREQSET
+OUTDIR  = '../../Outcome/Single Probe Classification/%s' % FREQSET
 
 n_classes = 8
-n_freqs = 146
 filelist = sorted(os.listdir(INDIR))
 n_subjects = len(filelist)
-threshold = 0.390278 # estimated as 99.999 percentile over permutation F1 scores
+#threshold = 0.390278 # estimated as 99.999 percentile over permutation F1 scores
+threshold = 0.0
 categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
 
 f1_scores = np.zeros((n_classes, 200, n_subjects))
