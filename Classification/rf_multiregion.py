@@ -14,14 +14,14 @@ args = parser.parse_args()
 ms = str(args.ms)
 
 # parameters
-DATADIR = '../../Outcome/Feature matrices/'
+DATADIR = '../../Outcome/Feature matrices'
 n_cv = 5
 
 alldata = {}
 alldata['image_category'] = None
 alldata['neural_responses'] = None
 #for hz in ['4hz8', '9hz14', '15hz30', '31hz70', '70hz150']:
-for hz in ['5hz9', '10hz14', '15hz19', '20hz24', '25hz29', '30hz34', '35hz39', '40hz44', '45hz49', '50hz54', '55hz59', '60hz64',
+for hz in ['4hz8', '9hz14', '15hz19', '20hz24', '25hz29', '30hz34', '35hz39', '40hz44', '45hz49', '50hz54', '55hz59', '60hz64',
            '65hz69', '70hz74', '75hz79', '80hz84', '85hz89', '90hz94', '95hz99', '100hz104', '105hz109', '110hz114', '115hz119',
            '120hz124', '125hz129', '130hz134', '135hz139', '140hz144', '145hz149']:
     with open('%s/featurematrix_mean_%s_%s_LFP_8c_artif_bipolar_BA_responsive.pkl' % (DATADIR, hz, ms), 'rb') as f:
@@ -50,4 +50,4 @@ print confusion_matrix(alldata['image_category'], predicted)
 print f1_score(alldata['image_category'], predicted, average='weighted')
 
 # store the model
-joblib.dump(clf, 'rf-multi.pkl') 
+#joblib.dump(clf, 'rf-multi.pkl') 
