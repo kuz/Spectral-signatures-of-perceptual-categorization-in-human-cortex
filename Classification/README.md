@@ -1,9 +1,8 @@
 ## Order of execution
 
 #### RF on LFP features
-* `rf_on_lfp.sh` to compute predictions for every probe
-To continue move to the `Analysis` directory
+* `rf_on_ft.sh` to compute predictions for every probe (also `rf_on_ft_permutation.sh` and same for `bbgamma` and `lowgamma`)
+* compute the predictino scores by running `python ft_scorelist.py` (see the parameters inside)
 
-#### RF on FT features
 
-1. Run `rf.py -f mean_5hz9_0ms200_LFP_8c_artif_bipolar_BA_responsive`
+Now go to the [Analysis](../Analysis) directory.
