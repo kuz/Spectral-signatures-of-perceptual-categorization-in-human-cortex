@@ -63,9 +63,9 @@ for cid in range(len(categories)):
         plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
         plt.ylabel('Frequency (Hz)', size=10);
         plt.xlabel('Time (30 ms bin)', size=10);
-        plt.title('mean ratio %s-%d %s' % (sname, pid, category), size=11);
-        plt.savefig('%s/%d_%s/mean_ratio_%s-%d-%d_%s' % (OUTDIR, cid, category, sname, sid, pid, category), bbox_inches='tight');
-        #plt.savefig('%s/%d_%s/mean_ratio_%s-%d-%d_%s' % (OUTDIR, cid, category, sname, sid, pid, category), bbox_inches='tight');
+        plt.title('mean ratio %s-%d %s' % (sname, pid - 1, category), size=11);
+        plt.savefig('%s/%d_%s/mean_ratio_%s-%d-%d_%s' % (OUTDIR, cid, category, sname, sid, pid - 1, category), bbox_inches='tight');
+        #plt.savefig('%s/%d_%s/mean_ratio_%s-%d-%d_%s' % (OUTDIR, cid, category, sname, sid, pid - 1, category), bbox_inches='tight');
         plt.clf();
         plt.close(fig);
 
