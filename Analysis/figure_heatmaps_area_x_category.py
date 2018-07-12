@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pylab as plt
-import matplotlib.cm as 
+import matplotlib.cm as cm
 from matplotlib.colors import LogNorm
 
 # parameters
@@ -35,7 +35,7 @@ def heatmap(d, fname, title, categories, areas_of_interest, absolute=False):
     plt.close(fig);
 
 # lists
-categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
+categories = ['house', 'face', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
 
 # counte appearances of successfull probes in each area
 appearances = {}
@@ -56,7 +56,7 @@ for cid, category in enumerate(categories):
     print
 '''
 #areas_of_interest = [17, 18, 19, 20, 37, 6, 21, 22, 36, 48]
-areas_of_interest = [17, 18, 19, 20, 37]
+areas_of_interest = [17, 18, 19, 37, 20]
 
 # matrix with counts per area
 counts = np.zeros((len(categories), len(areas_of_interest)))
