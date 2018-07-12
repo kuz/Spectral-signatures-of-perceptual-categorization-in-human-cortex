@@ -8,9 +8,10 @@ freqlist = 5:5:149;
 windows = [[50 250]; [100 300]; [150 350]; [200 400]; [250 450]; [300 500]];
 nfreqs = length(freqlist);
 nwin = length(windows);
+category = 10;
 
 % create output directory
-outdata = [indata '_responsive'];
+outdata = [indata '_responsive_cat' num2str(category)];
 if exist(['../../Data/Intracranial/Processed/' outdata], 'dir') == 7
     disp(['Directory exists: ' outdata ', exiting...']);
     exit()
@@ -18,13 +19,14 @@ end
 mkdir(['../../Data/Intracranial/Processed/' outdata]);
 
 % load data
-load(['../../Outcome/Probe responsiveness/responsiveness_' indata '.mat']);
+load(['../../Outcome/Probe responsiveness/responsiveness_cat' num2str(category) '_' indata '.mat']);
 listing = dir(['../../Data/Intracranial/Processed/' indata '/*.mat']);
 
 % mark for dropping the probes that are not significant or not responsive
 for wid = 1:nwin
     for fid = 1:nfreqs
-        pID = fdr(results{wid, fid}(:, 3), 0.05);
+        %pID = fdr(results{wid, fid}(:, 3), 0.05);
+        pID = 0.005 / (11321 * 174); % Bonferroni
         ratio = results{wid, fid}(:, 6) ./ results{wid, fid}(:, 5);
         results{wid, fid}(:, 4) = results{wid, fid}(:, 3) >= pID;
     end
@@ -77,7 +79,7 @@ for si = 1:length(listing)
 
     % store the data
     save(['../../Data/Intracranial/Processed/' outdata '/' sfile.name], 's');
-    clearvars -except indata nfreqs nwin outdata listing results nsurvivors todrop
+    clearvars -except indata nfreqs nwin outdata listing results nsurvivors todrop category
     
 end
 
