@@ -9,6 +9,9 @@ from scipy.stats import mannwhitneyu
 from surfer import Brain
 import pdb
 
+from functions_plotting import panel_importance
+from functions_helpers import safemkdir
+
 # parameters
 FREQSET = 'FT'
 INDIR = '../../Outcome/Single Probe Classification/%s/Importances' % FREQSET
@@ -26,12 +29,6 @@ subjlist = sorted(os.listdir('../../Outcome/Single Probe Classification/%s/Predi
 n_subjects = len(subjlist)
 scores_spc = np.load('%s/../scores_sid_pid_cat.npy' % INDIR).item()
 
-def safemkdir(path):
-    try:
-        os.mkdir(path)
-    except:
-        pass
-
 # plot definition
 def cluster_mean(activity, title, cluster_color):
     fig = plt.figure(figsize=(8, 6), dpi=300);
@@ -47,7 +44,6 @@ def cluster_mean(activity, title, cluster_color):
     plt.clf();
     plt.close(fig);
 
-
 def quadriptych(importances, foci, foci_colors, cluster_means, cluster_predictive_score, title, filenames, lines=True):
     
     fig = plt.figure(figsize=(40, 8), dpi=300);
@@ -55,22 +51,7 @@ def quadriptych(importances, foci, foci_colors, cluster_means, cluster_predictiv
 
     # overall importances
     ax1 = plt.subplot2grid((2, 8), (0, 0), colspan=2, rowspan=2)
-    plt.imshow(importances, interpolation='none', origin='lower', cmap=cm.Blues, aspect='auto');
-    plt.colorbar();
-    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--')
-    if lines:
-        plt.axvline(x=19, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axvline(x=24, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axvline(x=32, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=4, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=10, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=27, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=56, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-    plt.xticks(np.arange(0, 48, 1.5), np.asarray((np.arange(0, 769, 24) - 256) / 512.0 * 1000, dtype='int'), size=11, rotation=90);
-    plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=12);
-    plt.ylabel('Frequency (Hz)', size=16);
-    plt.xlabel('Time (ms)', size=16);
-    plt.title(title, size=16);
+    panel_importance(importances, title, lines)
 
     # 4 most prominents clusters of activity under the important regions
     ax2 = plt.subplot2grid((2, 8), (0, 2))
@@ -242,7 +223,10 @@ for cid, category in enumerate(categories):
 
     #pdb.set_trace()
 
+
+
     # Category mean, 4 clusters, locations
+    '''
     colors = ['whitesmoke', 'green', 'blue', 'red', 'black']
     cluster_means = np.zeros((4, important_activity_patterns.shape[1], important_activity_patterns.shape[2]))
     cluster_predictive_score = np.zeros((4,))
@@ -271,6 +255,9 @@ for cid, category in enumerate(categories):
     # power amplitudes
     for i in range(4):
         print "Cluster %d: %.4f" % (i + 1, np.percentile(cluster_means[i, 46:, 20:35], 75))
+    '''
+
+
 
     # difference significance
     '''
@@ -284,6 +271,7 @@ for cid, category in enumerate(categories):
     print ""
     '''
 
+
     # generate figures
     '''
     foci_colors = np.array([colors[i] for i in cluster_color_ids])
@@ -293,10 +281,13 @@ for cid, category in enumerate(categories):
     '''
 
 
+
     # importance in time
     #most_important_moment = np.argmax(np.sum(importance[:, :, :], axis=1), axis=1)
     #most_important_moment = np.argsort(np.sum((importance[:, :, 17:48] * temporal_weights), axis=(1, 2)))
     #temporal_weights = np.tile(range(17,48), len(successful_areas)*146).reshape(len(successful_areas), 146, len(range(17,48))) / 47.0
+
+
 
     # Plot each probe's importances
     """
@@ -324,28 +315,6 @@ for cid, category in enumerate(categories):
                  ['%s/%s/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, cid, category, sid, pid),
                   '%s/%s/BA%d/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, area, cid, category, sid, pid),
                   '%s/%s/Subject%d/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, sid, cid, category, sid, pid)])
-    """
-
-    # Mono and Poly predictive probes
-    """
-    monoprobes = []
-    polyprobes = []
-    for i, (pid, sid) in enumerate(successful_probes):
-        pid = pid - 1
-        if len(scores_spc[sid][pid]) == 1:
-            monoprobes.append(i)
-        else:
-            polyprobes.append(i)
-
-    triptych(np.mean(importance[monoprobes, :, :], 0), successful_mnis[monoprobes],
-             'Importance of spectrotemporal features for "%s"\nmean over %d monopredictive probes' % (categories[cid], len(monoprobes)),
-             ['%s/%s/FT_importances_%d_%s_MONO_MEAN.png' % (OUTDIR, subdir, cid, category)])
-    print 'BAs: ', successful_areas[monoprobes]
-
-    triptych(np.mean(importance[polyprobes, :, :], 0), successful_mnis[polyprobes],
-             'Importance of spectrotemporal features for "%s"\nmean over %d polypredictive probes' % (categories[cid], len(polyprobes)),
-             ['%s/%s/FT_importances_%d_%s_POLY_MEAN.png' % (OUTDIR, subdir, cid, category)])
-    print 'BAs: ', successful_areas[polyprobes]
     """
     
 
@@ -383,9 +352,13 @@ for cid, category in enumerate(categories):
     """
 
     # Mean over each BA
-    """
-    for ba in np.unique(successful_areas):    
-        triptych(np.mean(importance[successful_areas == ba, :, :], 0), successful_mnis[successful_areas == ba],
-                 'Importance of spectrotemporal features for "%s"\nmean over %d probes in BA%d' % (categories[cid], np.sum(successful_areas == ba), ba),
-                 ['%s/%s/FT_importances_%d_%s_MEAN_BA%d.png' % (OUTDIR, subdir, cid, category, ba)])
-    """
+    for ba in np.unique(successful_areas):
+        fig = plt.figure(figsize=(10, 8), dpi=300);
+        title = 'Importance of spectrotemporal features for "%s"\nmean over %d probes in BA%d' % (categories[cid], np.sum(successful_areas == ba), ba)
+        panel_importance(np.mean(importance[successful_areas == ba, :, :], 0), title, True)
+        plt.savefig('%s/FT_importances_%d_%s_BA%d.png' % (OUTDIR, cid, category, ba), bbox_inches='tight');
+        plt.clf();
+        plt.close(fig);
+
+    
+        
