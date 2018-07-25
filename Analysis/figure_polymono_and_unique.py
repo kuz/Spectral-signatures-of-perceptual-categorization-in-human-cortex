@@ -1,20 +1,10 @@
-"""
-
-To setup Freesurfer run
-$ export FREESURFER_HOME=/Applications/freesurfer
-$ source $FREESURFER_HOME/SetUpFreeSurfer.sh
-
-"""
-
 import os
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')
+from functions_plotting import triptych_importance, triptych_fitfdiff
+from functions_helpers import safemkdir
 from matplotlib import pylab as plt
-import matplotlib.cm as cm
 import scipy.io as sio
 from scipy.stats import mannwhitneyu
-from surfer import Brain
 import pdb
 
 # parameters
@@ -22,81 +12,13 @@ FREQSET = 'FT'
 INDIR = '../../Outcome/Single Probe Classification/%s/Importances' % FREQSET
 CLUSTDIR = '../../Outcome/Clustering'
 DATADIR = '../../Data/Intracranial/Processed'
-OUTDIR = '../../Outcome/Figures'
-
-# surfer parameters
-subject_id = "fsaverage"
+OUTDIR = '../../Outcome/Figures/polymono'
 
 # lists
 categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
 subjlist = sorted(os.listdir('../../Outcome/Single Probe Classification/%s/Predictions' % FREQSET))
 n_subjects = len(subjlist)
 scores_spc = np.load('%s/../scores_sid_pid_cat.npy' % INDIR).item()
-
-def safemkdir(path):
-    try:
-        os.mkdir(path)
-    except:
-        pass
-
-def triptych(importances, foci, title, filenames, lines=True):
-    
-    fig = plt.figure(figsize=(28, 8), dpi=200);
-
-    # overall importances
-    ax1 = plt.subplot2grid((1, 3), (0, 0), colspan=1, rowspan=1)
-    plt.imshow(importances, interpolation='none', origin='lower', cmap=cm.Blues, aspect='auto');
-    plt.colorbar();
-    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--')
-    if lines:
-        plt.axvline(x=19, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axvline(x=24, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axvline(x=32, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=4, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=10, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=27, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=56, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-    plt.xticks(np.arange(0, 48, 1.5), np.asarray((np.arange(0, 769, 24) - 256) / 512.0 * 1000, dtype='int'), size=11, rotation=90);
-    plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=12);
-    plt.ylabel('Frequency (Hz)', size=16);
-    plt.xlabel('Time (ms)', size=16);
-    plt.title(title, size=16);
-
-    # 3D mesh
-    ax1 = plt.subplot2grid((1, 3), (0, 1), colspan=1, rowspan=1)
-    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.1, background='white');
-    brain.add_foci(foci, hemi='rh', scale_factor=0.4, color="blue");
-    brain.show_view('m');
-    pic = brain.screenshot()
-    plt.imshow(pic);
-    plt.xlabel('MNI Y', size=16);
-    plt.xticks(np.arange(0, 800, 20), np.asarray(np.arange(-75, 106, 4.5), dtype='int'), size=10, rotation=90);
-    plt.ylabel('MNI Z', size=16);
-    plt.yticks(np.arange(0, 800, 20), np.asarray(np.arange(96, -87, -4.372), dtype='int'), size=10);
-    plt.xlim(0, 800);
-    plt.ylim(800, 0);
-    ax1.text(10, 39, '1', fontsize=20)
-
-    # 3D mesh
-    ax1 = plt.subplot2grid((1, 3), (0, 2), colspan=1, rowspan=1)
-    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.1, background='white');
-    brain.add_foci(foci, hemi='rh', scale_factor=0.4, color="blue");
-    brain.show_view(view=dict(azimuth=0.0, elevation=0), roll=90);
-    pic = brain.screenshot()
-    plt.imshow(pic);
-    plt.xlabel('MNI Y', size=16);
-    plt.xticks(np.arange(0, 800, 20), np.asarray(np.arange(-75, 106, 4.5), dtype='int'), size=10, rotation=90);
-    plt.ylabel('MNI X', size=16);
-    plt.yticks(np.arange(0, 800, 20), np.asarray(np.arange(-94.5, 93.5, 4.7), dtype='int'), size=10);
-    plt.xlim(0, 800);
-    plt.ylim(800, 0);
-    ax1.text(10, 39, '2', fontsize=20)
-
-    # store the figure
-    for filename in filenames:
-        plt.savefig(filename, bbox_inches='tight');
-    plt.clf();
-    plt.close(fig);
 
 # global mono- and polypredictive probes
 all_importance_mono = None
@@ -106,10 +28,6 @@ all_mnis_poly = np.empty((0, 3))
 
 # separate plot for each category
 for cid, category in enumerate(categories):
-
-    print 'Drawing "%s" ...' % category
-    subdir = 'FT_importances_%d_%s' % (cid, category)
-    safemkdir('%s/%s' % (OUTDIR, subdir))
 
     importance = np.load('%s/%s' % (INDIR, 'FT_feature_importances_ctg%d.npy' % cid))
     successful_probes = np.load('%s/%s' % (INDIR, 'FT_successful_probes_ctg%d.npy' % cid))
@@ -126,8 +44,7 @@ for cid, category in enumerate(categories):
     successful_areas = np.delete(successful_areas, drop_idx, 0)
     cluster_labels = np.delete(cluster_labels, drop_idx, 0)
     important_activity_patterns = np.delete(important_activity_patterns, drop_idx, 0)
-
-    
+  
     # Mono and Poly predictive probes (of this catergory)
     monoprobes = []
     polyprobes = []
@@ -147,14 +64,65 @@ for cid, category in enumerate(categories):
     all_mnis_mono = np.vstack((all_mnis_mono, successful_mnis[monoprobes]))
     all_mnis_poly = np.vstack((all_mnis_poly, successful_mnis[polyprobes]))
 
-triptych(np.mean(all_importance_mono, axis=0), all_mnis_mono, "Monopredictive probes across all categories",
-                 ["%s/Monopredictive_all_categoires.png" % OUTDIR])
-triptych(np.mean(all_importance_poly, axis=0), all_mnis_poly, "Polypredictive probes across all categories",
-                 ["%s/Polypredictive_all_categoires.png" % OUTDIR])
+    # not sigma-different importance
+    importance_threshold_mono = np.mean(importance[monoprobes, :, :]) + np.std(importance[monoprobes, :, :])
+    importance_threshold_poly = np.mean(importance[polyprobes, :, :]) + np.std(importance[polyprobes, :, :])
+    most_importantce_mono = np.array(np.mean(importance[monoprobes, :, :], axis = 0) > importance_threshold_mono, dtype=np.int8)
+    most_importantce_poly = np.array(np.mean(importance[polyprobes, :, :], axis = 0) > importance_threshold_poly, dtype=np.int8)
+    most_importantce = np.array(most_importantce_mono + most_importantce_poly >= 1, dtype=np.int8)
 
-print "Number of monopredictive: %d" % all_mnis_mono.shape[0]
-print "Number of polypredictive: %d" % all_mnis_poly.shape[0]
-pdb.set_trace()
+    # sigma difference
+    sigma = 4.0
+    mean_importance_mono = np.mean(importance[monoprobes, :, :], axis=0)
+    mean_importance_poly = np.mean(importance[polyprobes, :, :], axis=0)
+    mean_importance_mono /= np.max(mean_importance_mono)
+    mean_importance_poly /= np.max(mean_importance_poly)
+    diff = mean_importance_mono - mean_importance_poly
+    absdiff = np.abs(diff)
+    significant_diff = absdiff > np.std(absdiff) * sigma
+
+    diffmap = most_importantce
+    diffmap[np.where(diff * significant_diff > 0)] =  2
+    diffmap[np.where(diff * significant_diff < 0)] = -1
+    both_mnis = np.vstack((successful_mnis[monoprobes], successful_mnis[polyprobes]))
+    triptych_fitfdiff(diffmap, both_mnis, ['red'] * len(successful_mnis[monoprobes]) + ['blue'] * len(successful_mnis[polyprobes]),
+                      {'red': 0.5, 'blue': 0.5}, ["%s/poly_vs_mono_%d_%s.png" % (OUTDIR, cid, category)],
+                      title="%d sigma difference: poly/mono FITF maps of %s" % (sigma, category), lines=True)
+
+
+# mono and polu over all categories
+triptych_importance(np.mean(all_importance_mono, axis=0), all_mnis_mono, ['red'] * len(all_mnis_mono),
+                    {'red': 0.3}, ["%s/monopredictive_all_categories.png" % OUTDIR],
+                    title="Monopredictive probes (%d) across all categories" % all_mnis_mono.shape[0], lines=True)
+triptych_importance(np.mean(all_importance_poly, axis=0), all_mnis_poly, ['blue'] * len(all_mnis_poly),
+                    {'blue': 0.3}, ["%s/polypredictive_all_categories.png" % OUTDIR],
+                    title="Polypredictive probes (%d) across all categories" % all_mnis_poly.shape[0], lines=True)
+
+# not sigma-different importance
+importance_threshold_mono = np.mean(all_importance_mono) + np.std(all_importance_mono)
+importance_threshold_poly = np.mean(all_importance_poly) + np.std(all_importance_poly)
+most_importantce_mono = np.array(np.mean(all_importance_mono, axis = 0) > importance_threshold_mono, dtype=np.int8)
+most_importantce_poly = np.array(np.mean(all_importance_poly, axis = 0) > importance_threshold_poly, dtype=np.int8)
+most_importantce = np.array(most_importantce_mono + most_importantce_poly >= 1, dtype=np.int8)
+
+# sigma difference
+sigma = 4.0
+mean_importance_mono = np.mean(all_importance_mono, axis=0)
+mean_importance_poly = np.mean(all_importance_poly, axis=0)
+mean_importance_mono /= np.max(mean_importance_mono)
+mean_importance_poly /= np.max(mean_importance_poly)
+diff = mean_importance_mono - mean_importance_poly
+absdiff = np.abs(diff)
+significant_diff = absdiff > np.std(absdiff) * sigma
+
+diffmap = most_importantce
+diffmap[np.where(diff * significant_diff > 0)] =  2
+diffmap[np.where(diff * significant_diff < 0)] = -1
+both_mnis = np.vstack((all_mnis_mono, all_mnis_poly))
+triptych_fitfdiff(diffmap, both_mnis, ['red'] * len(all_mnis_mono) + ['blue'] * len(all_mnis_poly),
+                  {'red': 0.3, 'blue': 0.3}, ["%s/poly_vs_mono_all_categories.png" % OUTDIR],
+                  title="%d sigma difference between poly and mono FITF maps" % sigma, lines=True) 
+
 
 
 if False:
