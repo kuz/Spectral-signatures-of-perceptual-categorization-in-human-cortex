@@ -15,6 +15,7 @@ import matplotlib.cm as cm
 import scipy.io as sio
 from surfer import Brain
 import pdb
+from functions_plotting import duoptych
 
 # parameters
 FREQSET = 'FT'
@@ -30,54 +31,6 @@ subject_id = "fsaverage"
 categories = ['house']
 category_codes = ['10', '20', '30', '40', '50', '60', '70', '90']
 subjlist = sorted(os.listdir('../../Outcome/Single Probe Classification/%s/Predictions' % FREQSET))
-
-def duoptych(foci, foci_colors, filenames):
-    
-    fig = plt.figure(figsize=(16, 8), dpi=200);
-
-    # 3D mesh
-    ax1 = plt.subplot2grid((1, 2), (0, 0), colspan=1, rowspan=1)
-    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.1, background='white');
-    for color in np.unique(foci_colors):
-        if color == 'blue':
-            brain.add_foci(foci[foci_colors==color, :], hemi='rh', scale_factor=0.15, color=color);
-        else:
-            brain.add_foci(foci[foci_colors==color, :], hemi='rh', scale_factor=0.3, color=color);
-    brain.show_view('m');
-    pic = brain.screenshot()
-    plt.imshow(pic);
-    plt.xlabel('MNI Y', size=16);
-    plt.xticks(np.arange(0, 800, 20), np.asarray(np.arange(-75, 106, 4.5), dtype='int'), size=10, rotation=90);
-    plt.ylabel('MNI Z', size=16);
-    plt.yticks(np.arange(0, 800, 20), np.asarray(np.arange(96, -87, -4.372), dtype='int'), size=10);
-    plt.xlim(0, 800);
-    plt.ylim(800, 0);
-    ax1.text(10, 39, '1', fontsize=20)
-
-    # 3D mesh
-    ax1 = plt.subplot2grid((1, 2), (0, 1), colspan=1, rowspan=1)
-    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.1, background='white');
-    for color in np.unique(foci_colors):
-        if color == 'blue':
-            brain.add_foci(foci[foci_colors==color, :], hemi='rh', scale_factor=0.15, color=color);
-        else:
-            brain.add_foci(foci[foci_colors==color, :], hemi='rh', scale_factor=0.3, color=color);
-    brain.show_view(view=dict(azimuth=0.0, elevation=0), roll=90);
-    pic = brain.screenshot()
-    plt.imshow(pic);
-    plt.xlabel('MNI Y', size=16);
-    plt.xticks(np.arange(0, 800, 20), np.asarray(np.arange(-75, 106, 4.5), dtype='int'), size=10, rotation=90);
-    plt.ylabel('MNI X', size=16);
-    plt.yticks(np.arange(0, 800, 20), np.asarray(np.arange(-94.5, 93.5, 4.7), dtype='int'), size=10);
-    plt.xlim(0, 800);
-    plt.ylim(800, 0);
-    ax1.text(10, 39, '2', fontsize=20)
-
-    # store the figure
-    for filename in filenames:
-        plt.savefig(filename, bbox_inches='tight');
-    plt.clf();
-    plt.close(fig);
 
 # separate plot for each category
 for cid, category in enumerate(categories):
@@ -97,12 +50,11 @@ for cid, category in enumerate(categories):
         responsive_mnis = s['s']['probes'][0][0][0][0][2]
         if responsive_mnis.shape[0] > 0:
             foci = np.vstack((foci, responsive_mnis))
-            colors += ['blue'] * responsive_mnis.shape[0]
+            colors += ['green'] * responsive_mnis.shape[0]
 
     # add predictive probes to the list
-    colors += ['green'] * successful_mnis.shape[0]
+    colors += ['blue'] * successful_mnis.shape[0]
     foci = np.vstack((foci, successful_mnis))
 
     # plot
-    duoptych(foci, np.array(colors), ["%s/responsive_vs_predictive_%s.png" % (OUTDIR, category)])
-
+    duoptych(foci, np.array(colors), {'blue': 0.3, 'green': 0.15}, ["%s/responsive_vs_predictive_%s.png" % (OUTDIR, category)])

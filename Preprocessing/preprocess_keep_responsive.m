@@ -24,7 +24,9 @@ listing = dir(['../../Data/Intracranial/Processed/' indata '/*.mat']);
 % mark for dropping the probes that are not significant or not responsive
 for wid = 1:nwin
     for fid = 1:nfreqs
-        pID = fdr(results{wid, fid}(:, 3), 0.05);
+        %pID = fdr(results{wid, fid}(:, 3), 0.05);
+        pID = fdr(results{wid, fid}(:, 3), 0.005);
+        %pID = 0.05 / (11321 * 174); 
         ratio = results{wid, fid}(:, 6) ./ results{wid, fid}(:, 5);
         results{wid, fid}(:, 4) = results{wid, fid}(:, 3) >= pID;
     end
