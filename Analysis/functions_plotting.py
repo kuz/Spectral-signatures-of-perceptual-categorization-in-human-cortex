@@ -69,12 +69,12 @@ def panel_curves(curves, types, colors, legend, title):
     plt.ylabel('Feature imporatance', size=16);
     plt.title(title, size=16);
 
-def panel_time_profile(v, title, lines):
+def panel_time_profile(v, title, ylabel, lines):
     plt.bar(range(len(v)), v, color="blue")
     plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--')
-    plt.xticks(np.arange(0, 48, 1.5), np.asarray((np.arange(0, 769, 24) - 256) / 512.0 * 1000, dtype='int'), size=11, rotation=90);
+    plt.xticks(np.arange(0, 48, 2), np.asarray((np.arange(0, 769, 32) - 256) / 512.0 * 1000, dtype='int'), size=11, rotation=90);
     #plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=12);
-    plt.ylabel('Importance', size=16);
+    plt.ylabel(ylabel, size=16);
     plt.xlabel('Time (ms)', size=16);
     plt.title(title, size=16);
 
