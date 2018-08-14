@@ -64,12 +64,14 @@ for cid, category in enumerate(categories):
     all_mnis_mono = np.vstack((all_mnis_mono, successful_mnis[monoprobes]))
     all_mnis_poly = np.vstack((all_mnis_poly, successful_mnis[polyprobes]))
 
-    # not sigma-different importance
-    importance_threshold_mono = np.mean(importance[monoprobes, :, :]) + np.std(importance[monoprobes, :, :])
-    importance_threshold_poly = np.mean(importance[polyprobes, :, :]) + np.std(importance[polyprobes, :, :])
+    # common importance
+    #importance_threshold_mono = np.mean(importance[monoprobes, :, :]) + np.std(importance[monoprobes, :, :])
+    #importance_threshold_poly = np.mean(importance[polyprobes, :, :]) + np.std(importance[polyprobes, :, :])
+    importance_threshold_mono = 4 * np.std(importance[monoprobes, :, :15])
+    importance_threshold_poly = 4 * np.std(importance[polyprobes, :, :15])
     most_importantce_mono = np.array(np.mean(importance[monoprobes, :, :], axis = 0) > importance_threshold_mono, dtype=np.int8)
     most_importantce_poly = np.array(np.mean(importance[polyprobes, :, :], axis = 0) > importance_threshold_poly, dtype=np.int8)
-    most_importantce = np.array(most_importantce_mono + most_importantce_poly >= 1, dtype=np.int8)
+    common_importantce = np.array(most_importantce_mono + most_importantce_poly >= 2, dtype=np.int8)
 
     # sigma difference
     sigma = 4.0
@@ -81,7 +83,7 @@ for cid, category in enumerate(categories):
     absdiff = np.abs(diff)
     significant_diff = absdiff > np.std(absdiff) * sigma
 
-    diffmap = most_importantce
+    diffmap = common_importantce
     diffmap[np.where(diff * significant_diff > 0)] =  2
     diffmap[np.where(diff * significant_diff < 0)] = -1
     both_mnis = np.vstack((successful_mnis[monoprobes], successful_mnis[polyprobes]))
@@ -99,11 +101,11 @@ triptych_importance(np.mean(all_importance_poly, axis=0), all_mnis_poly, ['blue'
                     title="Polypredictive probes (%d) across all categories" % all_mnis_poly.shape[0], lines=True)
 
 # not sigma-different importance
-importance_threshold_mono = np.mean(all_importance_mono) + np.std(all_importance_mono)
-importance_threshold_poly = np.mean(all_importance_poly) + np.std(all_importance_poly)
+importance_threshold_mono = 4 * np.std(all_importance_mono[:, :, :15])
+importance_threshold_poly = 4 * np.std(all_importance_poly[:, :, :15])
 most_importantce_mono = np.array(np.mean(all_importance_mono, axis = 0) > importance_threshold_mono, dtype=np.int8)
 most_importantce_poly = np.array(np.mean(all_importance_poly, axis = 0) > importance_threshold_poly, dtype=np.int8)
-most_importantce = np.array(most_importantce_mono + most_importantce_poly >= 1, dtype=np.int8)
+common_importantce = np.array(most_importantce_mono + most_importantce_poly >= 1, dtype=np.int8)
 
 # sigma difference
 sigma = 4.0
@@ -115,7 +117,7 @@ diff = mean_importance_mono - mean_importance_poly
 absdiff = np.abs(diff)
 significant_diff = absdiff > np.std(absdiff) * sigma
 
-diffmap = most_importantce
+diffmap = common_importantce
 diffmap[np.where(diff * significant_diff > 0)] =  2
 diffmap[np.where(diff * significant_diff < 0)] = -1
 both_mnis = np.vstack((all_mnis_mono, all_mnis_poly))
