@@ -1,3 +1,11 @@
+"""
+
+To setup Freesurfer run
+$ export FREESURFER_HOME=/Applications/freesurfer
+$ source $FREESURFER_HOME/SetUpFreeSurfer.sh
+
+"""
+
 import os
 import numpy as np
 import matplotlib
@@ -188,8 +196,7 @@ for cid, category in enumerate(categories):
     cluster_labels = np.delete(cluster_labels, drop_idx, 0)
     important_activity_patterns = np.delete(important_activity_patterns, drop_idx, 0)
 
-    # drop all that are not showing broadband gamma decrease
-    '''
+    '''# drop all that are not showing broadband gamma decrease
     bbgamma_decrease = [(3, 14), (3, 102), (3, 104), (15, 117), (15, 119), (15, 154), (22, 91), (24, 49), (24, 138), (33, 116), (42, 107),
                         (57, 148), (75, 16), (80, 90), (80, 91), (1, 107), (6, 74), (8, 105), (9, 12), (9, 29), (9, 37), (15, 118), (15, 155),
                         (22, 81), (22, 89), (24, 132), (28, 72), (30, 33), (33, 117), (33, 121), (33, 122), (38, 92), (40, 122), (49, 69),
@@ -205,11 +212,9 @@ for cid, category in enumerate(categories):
     successful_mnis = np.delete(successful_mnis, drop_idx, 0)
     successful_areas = np.delete(successful_areas, drop_idx, 0)
     cluster_labels = np.delete(cluster_labels, drop_idx, 0)
-    important_activity_patterns = np.delete(important_activity_patterns, drop_idx, 0)
-    '''
+    important_activity_patterns = np.delete(important_activity_patterns, drop_idx, 0)'''
 
-    # four most important clusters' sample means
-    # here we manually specify for every category which cluster ID's are the most important ones
+    # four most important clusters' sample means, we manually specify for every category which cluster ID's are the most important ones
     important_clusters = {
         0: [1, 4, 5, 6],
         1: [1, 2, 3, 7],
@@ -221,12 +226,7 @@ for cid, category in enumerate(categories):
         7: [1, 2, 3, 5]
     }
 
-    #pdb.set_trace()
-
-
-
     # Category mean, 4 clusters, locations
-    '''
     colors = ['whitesmoke', 'green', 'blue', 'red', 'black']
     cluster_means = np.zeros((4, important_activity_patterns.shape[1], important_activity_patterns.shape[2]))
     cluster_predictive_score = np.zeros((4,))
@@ -255,12 +255,8 @@ for cid, category in enumerate(categories):
     # power amplitudes
     for i in range(4):
         print "Cluster %d: %.4f" % (i + 1, np.percentile(cluster_means[i, 46:, 20:35], 75))
-    '''
 
-
-
-    # difference significance
-    '''
+    '''# difference significance
     diff_pvalue_matrix = np.zeros((4, 4))
     for i in range(4):
         for j in range(4):
@@ -268,29 +264,23 @@ for cid, category in enumerate(categories):
     
     np.set_printoptions(precision=6, suppress=True)
     print diff_pvalue_matrix
-    print ""
-    '''
-
+    print ""'''
 
     # generate figures
-    '''
     foci_colors = np.array([colors[i] for i in cluster_color_ids])
+    #importance -= np.percentile(importance[:, :15, :], 90) # normalize by subtracting almost MAX of aseline
+    #importance[importance < 0.0] = 0.0 
+    #importance /= np.sum(importance)
     quadriptych(np.mean(importance, 0), successful_mnis, foci_colors, cluster_means, cluster_predictive_score, 
                 'Importance of spectrotemporal features for "%s"' % categories[cid],
                 ['%s/FT_importances_%d_%s_MEAN.png' % (OUTDIR, cid, category)])
-    '''
-
-
 
     # importance in time
     #most_important_moment = np.argmax(np.sum(importance[:, :, :], axis=1), axis=1)
     #most_important_moment = np.argsort(np.sum((importance[:, :, 17:48] * temporal_weights), axis=(1, 2)))
     #temporal_weights = np.tile(range(17,48), len(successful_areas)*146).reshape(len(successful_areas), 146, len(range(17,48))) / 47.0
 
-
-
-    # Plot each probe's importances
-    """
+    '''# Plot each probe's importances
     for i in range(importance.shape[0]):
 
         (pid, sid) = successful_probes[i]
@@ -314,11 +304,9 @@ for cid, category in enumerate(categories):
                  'Importance of spectrotemporal features for "%s"\nsID: %d   pID: %d   BA: %d' % (categories[cid], sid, pid, area),
                  ['%s/%s/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, cid, category, sid, pid),
                   '%s/%s/BA%d/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, area, cid, category, sid, pid),
-                  '%s/%s/Subject%d/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, sid, cid, category, sid, pid)])
-    """
-    
+                  '%s/%s/Subject%d/FT_importances_%d_%s_s%d-p%d.png' % (OUTDIR, subdir, sid, cid, category, sid, pid)])'''
 
-    """
+    '''# 
     for ba in np.unique(successful_areas):
 
         #most_important_moment = np.argmax(np.sum(np.mean(importance[successful_areas == ba, :, :], axis=0), axis=0))
@@ -348,17 +336,13 @@ for cid, category in enumerate(categories):
 
         plt.savefig('%s/%s/Time/FT_importances_%d_%s_time%d_MEAN_BA%d.png' % (OUTDIR, subdir, cid, category, most_important_moment, ba), bbox_inches='tight');
         plt.clf();
-        plt.close(fig);
-    """
+        plt.close(fig);'''
 
-    # Mean over each BA
+    '''# Mean over each BA
     for ba in np.unique(successful_areas):
         fig = plt.figure(figsize=(10, 8), dpi=300);
         title = 'Importance of spectrotemporal features for "%s"\nmean over %d probes in BA%d' % (categories[cid], np.sum(successful_areas == ba), ba)
         panel_importance(np.mean(importance[successful_areas == ba, :, :], 0), title, True)
         plt.savefig('%s/FT_importances_%d_%s_BA%d.png' % (OUTDIR, cid, category, ba), bbox_inches='tight');
         plt.clf();
-        plt.close(fig);
-
-    
-        
+        plt.close(fig);'''
