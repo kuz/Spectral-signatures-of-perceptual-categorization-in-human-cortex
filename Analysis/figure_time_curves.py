@@ -46,6 +46,9 @@ for cid, category in enumerate(categories):
     mean_importance_bbgamma -= np.mean(mean_importance_bbgamma[:15])
     mean_importance_lowfreq -= np.mean(mean_importance_lowfreq[:15])
     
+    mean_importance_lowfreq /= (np.sum(mean_importance_lowfreq) + np.sum(mean_importance_bbgamma))
+    mean_importance_bbgamma /= (np.sum(mean_importance_lowfreq) + np.sum(mean_importance_bbgamma))
+
     fig = plt.figure(figsize=(10, 8), dpi=200);
     panel_curves([mean_importance_lowfreq, mean_importance_bbgamma],
                  ['-', '--'],
@@ -61,6 +64,9 @@ mean_importance_bbgamma = np.sum(np.mean(all_importance[:, 46: :], axis=0), axis
 mean_importance_lowfreq = np.sum(np.mean(all_importance[:, :46 :], axis=0), axis=0)
 mean_importance_bbgamma -= np.mean(mean_importance_bbgamma[:15])
 mean_importance_lowfreq -= np.mean(mean_importance_lowfreq[:15])
+
+mean_importance_lowfreq /= (np.sum(mean_importance_lowfreq) + np.sum(mean_importance_bbgamma))
+mean_importance_bbgamma /= (np.sum(mean_importance_lowfreq) + np.sum(mean_importance_bbgamma))
 
 fig = plt.figure(figsize=(10, 8), dpi=200);
 panel_curves([mean_importance_lowfreq, mean_importance_bbgamma],
