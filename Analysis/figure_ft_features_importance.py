@@ -14,10 +14,9 @@ from matplotlib import pylab as plt
 import matplotlib.cm as cm
 import scipy.io as sio
 from scipy.stats import mannwhitneyu
-from surfer import Brain
 import pdb
 
-from functions_plotting import panel_importance
+from functions_plotting import quadriptych
 from functions_helpers import safemkdir
 
 # parameters
@@ -27,151 +26,11 @@ CLUSTDIR = '../../Outcome/Clustering'
 DATADIR = '../../Data/Intracranial/Processed'
 OUTDIR = '../../Outcome/Figures'
 
-# surfer parameters
-subject_id = "fsaverage"
-#subjects_dir = os.environ["SUBJECTS_DIR"]
-
 # lists
 categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
 subjlist = sorted(os.listdir('../../Outcome/Single Probe Classification/%s/Predictions' % FREQSET))
 n_subjects = len(subjlist)
 scores_spc = np.load('%s/../scores_sid_pid_cat.npy' % INDIR).item()
-
-# plot definition
-def cluster_mean(activity, title, cluster_color):
-    fig = plt.figure(figsize=(8, 6), dpi=300);
-    plt.imshow(d, interpolation='none', origin='lower', cmap=cm.bwr, aspect='auto', vmin=-3.0, vmax=3.0);
-    plt.colorbar();
-    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
-    plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=12, rotation=90);
-    plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=12);
-    plt.ylabel('Frequency (Hz)', size=16);
-    plt.xlabel('Time (ms)', size=16);
-    plt.title(title, size=16);
-    plt.savefig(fname, bbox_inches='tight');
-    plt.clf();
-    plt.close(fig);
-
-def quadriptych(importances, foci, foci_colors, cluster_means, cluster_predictive_score, title, filenames, lines=True):
-    
-    fig = plt.figure(figsize=(40, 8), dpi=300);
-    vlim = np.max([np.abs(np.min(cluster_means)), np.abs(np.max(cluster_means))]) * 1.2
-
-    # overall importances
-    ax1 = plt.subplot2grid((2, 8), (0, 0), colspan=2, rowspan=2)
-    panel_importance(importances, title, lines)
-
-    # 4 most prominents clusters of activity under the important regions
-    ax2 = plt.subplot2grid((2, 8), (0, 2))
-    plt.imshow(cluster_means[0], interpolation='none', origin='lower', cmap=cm.bwr, aspect=0.3, vmin=-vlim, vmax=vlim);
-    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
-    if lines:
-        plt.axvline(x=19, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axvline(x=24, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axvline(x=32, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=4, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=10, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=27, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=56, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-    plt.xticks(np.arange(0, 48, 2), np.asarray((np.arange(0, 769, 32) - 256) / 512.0 * 1000, dtype='int'), size=8, rotation=90);
-    plt.yticks(np.arange(0, 146, 10), np.arange(4, 150, 10), size=9);
-    plt.ylabel('Frequency (Hz)', size=16);
-    plt.title('Activity of GREEN electrodes', size=14, color='green');
-    ax2.text(1, 129, '1', fontsize=20)
-    ax2.text(35, 132, '%.4f' % cluster_predictive_score[0], fontsize=15)
-
-    ax1 = plt.subplot2grid((2, 8), (0, 3))
-    plt.imshow(cluster_means[1], interpolation='none', origin='lower', cmap=cm.bwr, aspect=0.3, vmin=-vlim, vmax=vlim);
-    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
-    if lines:
-        plt.axvline(x=19, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axvline(x=24, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axvline(x=32, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=4, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=10, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=27, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=56, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-    plt.xticks(np.arange(0, 48, 2), np.asarray((np.arange(0, 769, 32) - 256) / 512.0 * 1000, dtype='int'), size=8, rotation=90);
-    plt.yticks(np.arange(0, 146, 10), np.arange(4, 150, 10), size=9);
-    plt.title('Activity of BLUE electrodes', size=14, color='blue');
-    ax1.text(1, 129, '2', fontsize=20)
-    ax1.text(35, 132, '%.4f' % cluster_predictive_score[1], fontsize=15)
-
-    ax1 = plt.subplot2grid((2, 8), (1, 2))
-    plt.imshow(cluster_means[2], interpolation='none', origin='lower', cmap=cm.bwr, aspect=0.3, vmin=-vlim, vmax=vlim);
-    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
-    if lines:
-        plt.axvline(x=19, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axvline(x=24, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axvline(x=32, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=4, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=10, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=27, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=56, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-    plt.xticks(np.arange(0, 48, 2), np.asarray((np.arange(0, 769, 32) - 256) / 512.0 * 1000, dtype='int'), size=8, rotation=90);
-    plt.yticks(np.arange(0, 146, 10), np.arange(4, 150, 10), size=9);
-    plt.ylabel('Frequency (Hz)', size=16);
-    plt.xlabel('Time (ms)', size=16);
-    plt.title('Activity of RED electrodes', size=14, color='red');
-    ax1.text(1, 129, '3', fontsize=20)
-    ax1.text(35, 132, '%.4f' % cluster_predictive_score[2], fontsize=15)
-
-    ax1 = plt.subplot2grid((2, 8), (1, 3))
-    plt.imshow(cluster_means[3], interpolation='none', origin='lower', cmap=cm.bwr, aspect=0.3, vmin=-vlim, vmax=vlim);
-    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
-    if lines:
-        plt.axvline(x=19, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axvline(x=24, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axvline(x=32, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=4, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=10, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=27, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-        plt.axhline(y=56, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-    plt.xticks(np.arange(0, 48, 2), np.asarray((np.arange(0, 769, 32) - 256) / 512.0 * 1000, dtype='int'), size=8, rotation=90);
-    plt.yticks(np.arange(0, 146, 10), np.arange(4, 150, 10), size=9);
-    plt.xlabel('Time (ms)', size=16);
-    plt.title('Activity of BLACK electrodes', size=14, color='black');
-    ax1.text(1, 129, '4', fontsize=20)
-    ax1.text(35, 132, '%.4f' % cluster_predictive_score[3], fontsize=15)
-
-    # 3D mesh
-    ax1 = plt.subplot2grid((2, 8), (0, 4), colspan=2, rowspan=2)
-    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.1, background='white');
-    for color in np.unique(foci_colors):
-        brain.add_foci(foci[foci_colors==color, :], hemi='rh', scale_factor=0.6, color=color);
-    brain.show_view('m');
-    pic = brain.screenshot()
-    plt.imshow(pic);
-    plt.xlabel('MNI Y', size=16);
-    plt.xticks(np.arange(0, 800, 20), np.asarray(np.arange(-75, 106, 4.5), dtype='int'), size=10, rotation=90);
-    plt.ylabel('MNI Z', size=16);
-    plt.yticks(np.arange(0, 800, 20), np.asarray(np.arange(96, -87, -4.372), dtype='int'), size=10);
-    plt.xlim(0, 800);
-    plt.ylim(800, 0);
-    ax1.text(10, 39, '1', fontsize=20)
-
-    # 3D mesh
-    ax1 = plt.subplot2grid((2, 8), (0, 6), colspan=2, rowspan=2)
-    brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.1, background='white');
-    for color in np.unique(foci_colors):
-        brain.add_foci(foci[foci_colors==color, :], hemi='rh', scale_factor=0.6, color=color);
-    brain.show_view(view=dict(azimuth=0.0, elevation=0), roll=90);
-    pic = brain.screenshot()
-    plt.imshow(pic);
-    plt.xlabel('MNI Y', size=16);
-    plt.xticks(np.arange(0, 800, 20), np.asarray(np.arange(-75, 106, 4.5), dtype='int'), size=10, rotation=90);
-    plt.ylabel('MNI X', size=16);
-    plt.yticks(np.arange(0, 800, 20), np.asarray(np.arange(-94.5, 93.5, 4.7), dtype='int'), size=10);
-    plt.xlim(0, 800);
-    plt.ylim(800, 0);
-    ax1.text(10, 39, '2', fontsize=20)
-
-    # store the figure
-    for filename in filenames:
-        plt.savefig(filename, bbox_inches='tight');
-    plt.clf();
-    plt.close(fig);
-
 
 # separate plot for each category
 for cid, category in enumerate(categories):
@@ -272,8 +131,9 @@ for cid, category in enumerate(categories):
     #importance[importance < 0.0] = 0.0 
     #importance /= np.sum(importance)
     quadriptych(np.mean(importance, 0), successful_mnis, foci_colors, cluster_means, cluster_predictive_score, 
-                'Importance of spectrotemporal features for "%s"' % categories[cid],
+                '%s' % categories[cid],
                 ['%s/FT_importances_%d_%s_MEAN.png' % (OUTDIR, cid, category)])
+
 
     # importance in time
     #most_important_moment = np.argmax(np.sum(importance[:, :, :], axis=1), axis=1)
