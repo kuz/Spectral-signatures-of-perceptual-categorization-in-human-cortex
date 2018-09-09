@@ -15,7 +15,12 @@ import matplotlib.cm as cm
 from matplotlib.colors import LinearSegmentedColormap
 import scipy.io as sio
 from scipy.stats import mannwhitneyu
-from surfer import Brain
+try:
+    from surfer import Brain
+    withsurfer = True
+except:
+    print "\nWARNING: PySurfer not available, 3D plotting will not work!\n"
+    withsurfer = False
 import pdb
 
 # surfer parameters
@@ -36,6 +41,29 @@ def panel_importance(importances, title, lines):
         plt.axhline(y=56, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
     #plt.xticks(np.arange(0, 48, 1.5), np.asarray((np.arange(0, 769, 24) - 256) / 512.0 * 1000, dtype='int'), size=11, rotation=90);
     #plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=12);
+    plt.xticks(np.arange(0, 48, 2), np.asarray((np.arange(0, 769, 32) - 256) / 512.0 * 1000, dtype='int'), size=18, rotation=90);
+    plt.yticks(np.arange(0, 146, 7), np.arange(4, 150, 7), size=18);
+    plt.ylabel('Frequency (Hz)', size=24);
+    plt.xlabel('Time (ms)', size=24);
+    if title is not None:
+        plt.title(title, size=26);
+
+def panel_activity(activity, title, lines, mask=None):
+    plt.imshow(activity, interpolation='none', origin='lower', cmap=cm.bwr, aspect='auto');
+    cb = plt.colorbar();
+    plt.clim(-4.0, 4.0)
+    if mask is not None:
+        plt.contour(mask, mask, colors='black', vmin=0.0, vmax=1.0, extend='max', linewidths=1.0)
+    cb.ax.tick_params(labelsize=16);
+    plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--')
+    if lines:
+        plt.axvline(x=19, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
+        plt.axvline(x=24, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
+        plt.axvline(x=32, ymin=0.0, ymax = 1.0, linewidth=0.5, color='gray', ls='-')
+        plt.axhline(y=4, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
+        plt.axhline(y=10, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
+        plt.axhline(y=27, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
+        plt.axhline(y=56, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
     plt.xticks(np.arange(0, 48, 2), np.asarray((np.arange(0, 769, 32) - 256) / 512.0 * 1000, dtype='int'), size=18, rotation=90);
     plt.yticks(np.arange(0, 146, 7), np.arange(4, 150, 7), size=18);
     plt.ylabel('Frequency (Hz)', size=24);
@@ -82,6 +110,10 @@ def panel_time_profile(v, title, ylabel, lines):
     plt.title(title, size=16);
 
 def panel_mesh_sagittal(foci, foci_colors, color_scales):
+    if not withsurfer:
+        print "Cannot do 3D without PySurder. Exiting"
+        exit()
+
     foci_colors = np.array(foci_colors)
     brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.1, background='white');
     for color in np.unique(foci_colors):
@@ -97,6 +129,10 @@ def panel_mesh_sagittal(foci, foci_colors, color_scales):
     plt.ylim(800, 0);
 
 def panel_mesh_axial(foci, foci_colors, color_scales):
+    if not withsurfer:
+        print "Cannot do 3D without PySurder. Exiting"
+        exit()
+
     foci_colors = np.array(foci_colors)
     brain = Brain(subject_id, "both", "pial", cortex='ivory', alpha=0.1, background='white');
     for color in np.unique(foci_colors):

@@ -5,11 +5,13 @@ matplotlib.use('Agg')
 from matplotlib import pylab as plt
 import matplotlib.cm as cm
 import scipy.io as sio
+from functions_plotting import panel_activity
+import pdb
 
 # parameters
 INDIR = '../../Outcome/Single Probe Classification/FT/Importances'
 DATADIR = '../../Data/Intracranial/Processed'
-OUTDIR = '../../Outcome/Figures/Mean ratio'
+OUTDIR = '../../Outcome/Figures'
 
 categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
 category_ids = [10, 20, 30, 40, 50, 60, 70, 90]
@@ -43,30 +45,20 @@ for cid in range(len(categories)):
         (pid, sid) = successful_probes[i]
         sname = subjlist[sid].replace('.npy', '')
         
-        #s = sio.loadmat('%s/%s/%s' % (DATADIR, 'ft_4hz150_LFP_8c_artif_bipolar_BA_responsive', '%s-%d.mat' % (sname, pid)))
-        #d = s['ft'][:, :, :] * mask
-        #d = s['ft'][:, :, :]
-        
         data = np.load('%s/%s/%s' % (DATADIR, 'normalized_ft_4hz150_LFP_8c_artif_bipolar_BA_responsive', '%s-%d.npy' % (sname, pid)))
-        #d = data * mask
-        d = data
+        masked_data = data * mask
         
-        m = np.mean(d[stimgroups == category_ids[cid], :, :], 0)
-        print np.min(m), np.max(m)
-        fig = plt.figure(figsize=(8, 6), dpi=300);
-        plt.imshow(m, interpolation='none', origin='lower', cmap=cm.bwr, aspect='auto');
-        #plt.imshow(m, interpolation='none', origin='lower', cmap=cm.jet, aspect='auto');
-        plt.clim(-4.0, 4.0)
-        plt.colorbar();
-        plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
-        plt.xticks(np.arange(0, 48), np.asarray((np.arange(0, 769, 16) - 256) / 512.0 * 1000, dtype='int'), size=5, rotation=90);
-        plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=5);
-        plt.ylabel('Frequency (Hz)', size=10);
-        plt.xlabel('Time (30 ms bin)', size=10);
-        plt.title('mean ratio %s-%d %s' % (sname, pid - 1, category), size=11);
-        plt.savefig('%s/%d_%s/mean_ratio_%s-%d-%d_%s' % (OUTDIR, cid, category, sname, sid, pid - 1, category), bbox_inches='tight');
-        #plt.savefig('%s/%d_%s/mean_ratio_%s-%d-%d_%s' % (OUTDIR, cid, category, sname, sid, pid - 1, category), bbox_inches='tight');
+        activity = np.mean(data[stimgroups == category_ids[cid], :, :], 0)
+        masked_activity = np.mean(masked_data[stimgroups == category_ids[cid], :, :], 0)
+        
+        fig = plt.figure(figsize=(10, 8), dpi=200);
+        panel_activity(activity, 'mean ratio %s-%d %s' % (sname, pid - 1, category), True, mask)
+        plt.savefig('%s/Mean ratio/%d_%s/mean_ratio_%s-%d-%d_%s' % (OUTDIR, cid, category, sname, sid, pid - 1, category), bbox_inches='tight');
         plt.clf();
         plt.close(fig);
 
-# clustering
+        fig = plt.figure(figsize=(10, 8), dpi=200);
+        panel_activity(masked_activity, 'masked mean %s-%d %s' % (sname, pid - 1, category), True)
+        plt.savefig('%s/Mean masked ratio/%d_%s/mean_masked_ratio_%s-%d-%d_%s' % (OUTDIR, cid, category, sname, sid, pid - 1, category), bbox_inches='tight');
+        plt.clf();
+        plt.close(fig);
