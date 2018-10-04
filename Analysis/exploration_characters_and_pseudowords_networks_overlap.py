@@ -35,7 +35,7 @@ full_list = full_list.tolist()
 successful_mnis_pseud = successful_mnis_pseud.tolist()
 successful_mnis_chars = successful_mnis_chars.tolist()
 
-# split into 4 groups
+# split into 3 groups
 for mni in full_list:
     if (mni in successful_mnis_chars) and (mni in successful_mnis_pseud):
         in_both = np.vstack((in_both, mni))
@@ -56,6 +56,6 @@ print "In both      ", in_both.shape[0]
 
 # plot
 fig = plt.figure(figsize=(16, 8), dpi=200);
-foci = np.vstack((in_both, only_in_chars, only_in_pseud))
-colors = ['green'] * in_both.shape[0] + ['black'] * only_in_chars.shape[0] + ['blue'] * only_in_pseud.shape[0]
-duoptych(foci, np.array(colors), {'blue': 0.3, 'green': 0.3, 'black': 0.3}, ["%s/pseudo_and_character_network.png" % OUTDIR])
+foci = np.vstack((in_both, only_in_pseud, only_in_chars))
+colors = ['black'] * in_both.shape[0] + ['blue'] * only_in_pseud.shape[0] + ['red'] * only_in_chars.shape[0]
+duoptych(foci, np.array(colors), {'black': 0.4, 'blue': 0.4, 'red': 0.4}, ["%s/pseudo_and_character_network.png" % OUTDIR])

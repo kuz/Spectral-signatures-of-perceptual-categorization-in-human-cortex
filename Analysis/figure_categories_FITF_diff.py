@@ -27,8 +27,8 @@ all_mnis_mono = np.empty((0, 3))
 all_mnis_poly = np.empty((0, 3))
 
 # competing categories
-cid_a = 5
-cid_b = 6
+cid_a = 6
+cid_b = 5
 
 # load data
 importance_a = np.load('%s/%s' % (INDIR, 'FT_feature_importances_ctg%d.npy' % cid_a))
@@ -46,6 +46,24 @@ drop_idx_b = np.unique(np.where(successful_mnis_b == [0, 0, 0])[0])
 importance_b = np.delete(importance_b, drop_idx_b, 0)
 successful_probes_b = np.delete(successful_probes_b, drop_idx_b, 0)
 successful_mnis_b = np.delete(successful_mnis_b, drop_idx_b, 0)
+
+# split into 3 groups
+in_both = np.empty((0, 3))
+only_in_a = np.empty((0, 3))
+only_in_b = np.empty((0, 3))
+
+successful_mnis_a_list = successful_mnis_a.tolist()
+successful_mnis_b_list = successful_mnis_b.tolist()
+successful_mnis_unique = np.unique(np.vstack((successful_mnis_a, successful_mnis_b)), axis=0)
+for mni in successful_mnis_unique:
+    if (mni in successful_mnis_a_list) and (mni in successful_mnis_b_list):
+        in_both = np.vstack((in_both, mni))
+    elif (mni in successful_mnis_chars) and (mni not in successful_mnis_pseud):
+        only_in_chars = np.vstack((only_in_chars, mni))
+    elif (mni not in successful_mnis_chars) and (mni in successful_mnis_pseud):
+        only_in_pseud = np.vstack((only_in_pseud, mni))
+    else:
+        print "Error: this can't be"
 
 # not sigma-different importance
 importance_threshold_a = np.mean(importance_a) + np.std(importance_a)
