@@ -8,7 +8,7 @@ freqlist = 5:5:149;
 windows = [[50 250]; [100 300]; [150 350]; [200 400]; [250 450]; [300 500]];
 nfreqs = length(freqlist);
 nwin = length(windows);
-category = 10;
+category = 90;
 
 % create output directory
 outdata = [indata '_responsive_cat' num2str(category)];

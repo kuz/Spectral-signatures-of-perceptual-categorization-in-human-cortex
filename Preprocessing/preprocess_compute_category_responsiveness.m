@@ -1,4 +1,4 @@
-parpool(8)
+parpool(4)
 
 % variables
 ei = exist('indata') == 1;
@@ -11,7 +11,7 @@ end
 addpath('spectra')
 
 % parameters
-category = 10; % house 
+category = 90;
 freqlist = 5:5:149;
 windows = [[50 250]; [100 300]; [150 350]; [200 400]; [250 450]; [300 500]];
 outdata = ['responsiveness_cat' num2str(category) '_' indata];

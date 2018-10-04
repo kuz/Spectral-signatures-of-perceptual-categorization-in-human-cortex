@@ -27,8 +27,7 @@ OUTDIR = '../../Outcome/Figures'
 subject_id = "fsaverage"
 
 # lists
-#categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
-categories = ['house']
+categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
 category_codes = ['10', '20', '30', '40', '50', '60', '70', '90']
 subjlist = sorted(os.listdir('../../Outcome/Single Probe Classification/%s/Predictions' % FREQSET))
 
@@ -57,4 +56,4 @@ for cid, category in enumerate(categories):
     foci = np.vstack((foci, successful_mnis))
 
     # plot
-    duoptych(foci, np.array(colors), {'blue': 0.3, 'green': 0.15}, ["%s/responsive_vs_predictive_%s.png" % (OUTDIR, category)])
+    duoptych(foci, np.array(colors), {'blue': 0.3, 'green': 0.15}, ["%s/responsive_vs_predictive_%d-%s.png" % (OUTDIR, cid, category)])
