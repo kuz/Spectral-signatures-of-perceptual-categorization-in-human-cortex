@@ -40,6 +40,9 @@ for cid, category in enumerate(categories):
     successful_probes = np.delete(successful_probes, drop_idx, 0)
     successful_mnis = np.delete(successful_mnis, drop_idx, 0)
 
+    # filter to only bbgamma
+    importance = importance[:, 46:, :]
+
     # count 4-sigma important probes in each time bin
     importance_threshold = np.mean(importance) + 4 * np.std(importance)
     ctg_counts = np.zeros(48)
