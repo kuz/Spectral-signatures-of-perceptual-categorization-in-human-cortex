@@ -92,7 +92,7 @@ for cid, category in enumerate(categories):
                       title="%d sigma difference: poly/mono FITF maps of %s" % (sigma, category), lines=True)
 
 
-# mono and polu over all categories
+# mono and poly over all categories
 triptych_importance(np.mean(all_importance_mono, axis=0), all_mnis_mono, ['red'] * len(all_mnis_mono),
                     {'red': 0.3}, ["%s/monopredictive_all_categories.png" % OUTDIR],
                     title="Monopredictive probes (%d) across all categories" % all_mnis_mono.shape[0], lines=True)
