@@ -2,6 +2,10 @@ import numpy as np
 from scipy.stats import ttest_ind, mannwhitneyu
 from copy import deepcopy
 np.set_printoptions(precision=3, linewidth=300)
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from functions_plotting import panel_boxplots
 import pdb
 
 # lists
@@ -23,6 +27,7 @@ successful_mnis = {}
 cluster_labels = {}
 CLUSTDIR = '../../Outcome/Clustering'
 INDIR = '../../Outcome/Single Probe Classification/FT/Importances'
+OUTDIR = '../../Outcome/Figures'
 for cid in range(len(categories)):
     successful_probes[cid] = np.load('%s/%s' % (INDIR, 'FT_successful_probes_ctg%d.npy' % cid))
     successful_mnis[cid] = np.load('%s/%s' % (INDIR, 'FT_successful_mnis_ctg%d.npy' % cid))
@@ -42,9 +47,14 @@ for freqset in freqsets:
     scores_spc[freqset] = np.load('%s/../scores_sid_pid_cat.npy' % INDIR).item()
 
 
+# prepare the figure
+fig = plt.figure(figsize=(10, 5), dpi=200);
+
 # 
 for cid, category in enumerate(categories):
     print '%s: (%d probes)' % (category, successful_probes[cid].shape[0])
+    if category == 'visage':
+        category = 'face'
     
     freqset_f1_scores = {}
     for freqset in freqsets:
@@ -64,12 +74,32 @@ for cid, category in enumerate(categories):
 
         freqset_f1_scores[freqset] = cluster_probe_f1_scores
         print '\t%s: %.4f' % (freqset[:2], cluster_predictive_score)
-            
-    print '\tFT > bb pval = %.6f' % mannwhitneyu(freqset_f1_scores['FT'], freqset_f1_scores['bbgamma'], alternative='greater').pvalue
-    print '\tFT > lo pval = %.6f' % mannwhitneyu(freqset_f1_scores['FT'], freqset_f1_scores['lowfreq'], alternative='greater').pvalue
-    print '\tbb > lo pval = %.6f' % mannwhitneyu(freqset_f1_scores['bbgamma'], freqset_f1_scores['lowfreq'], alternative='greater').pvalue
-    print '\tlo > bb pval = %.6f' % mannwhitneyu(freqset_f1_scores['lowfreq'], freqset_f1_scores['bbgamma'], alternative='greater').pvalue
+          
+    threshold = 0.001563
+    ftGbb = mannwhitneyu(freqset_f1_scores['FT'], freqset_f1_scores['bbgamma'], alternative='greater').pvalue
+    bbGft = mannwhitneyu(freqset_f1_scores['bbgamma'], freqset_f1_scores['FT'], alternative='greater').pvalue
+    ftGlo = mannwhitneyu(freqset_f1_scores['FT'], freqset_f1_scores['lowfreq'], alternative='greater').pvalue
+    loGft = mannwhitneyu(freqset_f1_scores['lowfreq'], freqset_f1_scores['FT'], alternative='greater').pvalue
+    bbGlo = mannwhitneyu(freqset_f1_scores['bbgamma'], freqset_f1_scores['lowfreq'], alternative='greater').pvalue
+    loGbb = mannwhitneyu(freqset_f1_scores['lowfreq'], freqset_f1_scores['bbgamma'], alternative='greater').pvalue
+
+    print '\tFT > bb pval = %.6f' % ftGbb
+    print '\tFT > lo pval = %.6f' % ftGlo
+    print '\tbb > lo pval = %.6f' % bbGlo
+    print '\tlo > bb pval = %.6f' % loGbb
     print ''
+
+    # add the boxplot
+    plot_significance = [None, None, None]
+    if ftGbb < threshold or bbGft < threshold:
+        plot_significance[0] = '%.5f' % min(ftGbb, bbGft)
+    if bbGlo < threshold or loGbb < threshold:
+        plot_significance[1] = '%.5f' % min(bbGlo, loGbb)
+    if ftGlo < threshold or loGft < threshold:
+        plot_significance[2] = '%.5f' % min(ftGlo, loGft)
+    ax = plt.subplot2grid((2, 4), (int(cid / 4), cid % 4), colspan=1, rowspan=1)
+    panel_boxplots([freqset_f1_scores['FT'], freqset_f1_scores['bbgamma'], freqset_f1_scores['lowfreq']], plot_significance, 
+                   category, cid in [4, 5, 6, 7], cid in [0, 4])
 
     for cluster_id in important_clusters[cid]:
         print '\tcluster %d (%d probes):' % (cluster_id, successful_probes[cid][cluster_labels[cid] == cluster_id].shape[0])
@@ -101,3 +131,9 @@ for cid, category in enumerate(categories):
         print '\t\tbb > lo pval = %.6f' % mannwhitneyu(freqset_f1_scores['bbgamma'], freqset_f1_scores['lowfreq'], alternative='greater').pvalue
         print '\t\tlo > bb pval = %.6f' % mannwhitneyu(freqset_f1_scores['lowfreq'], freqset_f1_scores['bbgamma'], alternative='greater').pvalue
         print ''
+
+fig.text(0.5, -0.01, 'Features', ha='center', size=12)
+fig.text(0.08, 0.5, 'F1 Score', va='center', rotation='vertical', size=12)
+plt.savefig('%s/boxplots/predictiveness_bbgamma_vs_low.png' % OUTDIR, bbox_inches='tight');
+plt.clf();
+plt.close(fig);

@@ -171,6 +171,45 @@ def panel_cluster_mean(cluster_id, cluster_means, cluster_predictive_score, vlim
     plt.text(1, 129, str(cluster_id + 1), fontsize=20)
     plt.text(35, 132, '%.4f' % cluster_predictive_score[cluster_id], fontsize=15)
 
+def panel_boxplots(data, significance, title, xlab, ylab):
+    bp = plt.boxplot(data, widths=0.5)
+    plt.ylim((0.0, 1.0))    
+    plt.setp(bp['boxes'], color='blue')
+    plt.setp(bp['whiskers'], color='blue')
+    plt.setp(bp['fliers'], color='blue')
+    plt.setp(bp['medians'], color='blue')
+    plt.setp(bp['caps'], color='blue')
+    plt.title(title, size=12)
+    
+    # labels
+    if ylab:
+        plt.yticks(np.arange(0.0, 1.1, 0.1), np.round(np.arange(0.0, 1.1, 0.1), 1), size=8);
+    else:
+        plt.yticks([], []);
+
+    if xlab:
+        plt.xticks([1, 2, 3], ['full\n4-150\nHz', 'bbgamma\n51-150\nHz', 'lowfreq\n4-50\nHz'], size=8, rotation=0);
+    else:
+        plt.xticks([], []);
+    
+    # significance brackets
+    h = 0.02
+
+    if significance[0] is not None:
+        y = 0.83
+        plt.plot([1, 1, 2-0.02, 2-0.02], [y, y+h, y+h, y], lw=0.5, c='black')
+        plt.text((1 + 2) * .5, y + h, significance[0], ha='center', va='bottom', color='black', size=7)
+
+    if significance[1] is not None:
+        y = 0.83
+        plt.plot([2+0.02, 2+0.02, 3, 3], [y, y+h, y+h, y], lw=0.5, c='black')
+        plt.text((2 + 3) * .5, y + h, significance[1], ha='center', va='bottom', color='black', size=7)
+
+    if significance[2] is not None:
+        y = 0.91
+        plt.plot([1, 1, 3, 3], [y, y+h, y+h, y], lw=0.5, c='black')
+        plt.text((1 + 3) * .5, y + h, significance[2], ha='center', va='bottom', color='black', size=7)
+
 def duoptych(foci, foci_colors, color_scales, filenames):
     
     fig = plt.figure(figsize=(16, 8), dpi=200);
