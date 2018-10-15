@@ -172,6 +172,9 @@ def panel_cluster_mean(cluster_id, cluster_means, cluster_predictive_score, vlim
     plt.text(35, 132, '%.4f' % cluster_predictive_score[cluster_id], fontsize=15)
 
 def panel_boxplots(data, significance, title, xlab, ylab):
+    if title == 'visage':
+        title = 'face'
+
     bp = plt.boxplot(data, widths=0.5)
     plt.ylim((0.0, 1.0))    
     plt.setp(bp['boxes'], color='blue')
@@ -188,27 +191,61 @@ def panel_boxplots(data, significance, title, xlab, ylab):
         plt.yticks([], []);
 
     if xlab:
-        plt.xticks([1, 2, 3], ['full\n4-150\nHz', 'bbgamma\n51-150\nHz', 'lowfreq\n4-50\nHz'], size=8, rotation=0);
+        if len(data) == 3:
+            plt.xticks([1, 2, 3], ['full\n4-150\nHz', 'bbgamma\n51-150\nHz', 'lowfreq\n4-50\nHz'], size=8, rotation=0);
+        if len(data) == 4:
+            plt.xticks([1, 2, 3, 4], ['C1', 'C2', 'C3', 'C4'], size=8, rotation=0);
     else:
         plt.xticks([], []);
     
+    plt.axhline(y=0.125, linestyle='--', color='gray', linewidth=0.8)
+    plt.axhline(y=0.390278, linestyle='--', color='gray', linewidth=0.8)
+
     # significance brackets
     h = 0.02
 
-    if significance[0] is not None:
-        y = 0.83
-        plt.plot([1, 1, 2-0.02, 2-0.02], [y, y+h, y+h, y], lw=0.5, c='black')
-        plt.text((1 + 2) * .5, y + h, significance[0], ha='center', va='bottom', color='black', size=7)
+    if len(data) == 3:
+        if significance[0] is not None:
+            y = 0.83
+            plt.plot([1, 1, 2-0.02, 2-0.02], [y, y+h, y+h, y], lw=0.5, c='black')
+            plt.text((1 + 2) * .5, y + h, significance[0], ha='center', va='bottom', color='black', size=7)
+        if significance[1] is not None:
+            y = 0.83
+            plt.plot([2+0.02, 2+0.02, 3, 3], [y, y+h, y+h, y], lw=0.5, c='black')
+            plt.text((2 + 3) * .5, y + h, significance[1], ha='center', va='bottom', color='black', size=7)
+        if significance[2] is not None:
+            y = 0.91
+            plt.plot([1, 1, 3, 3], [y, y+h, y+h, y], lw=0.5, c='black')
+            plt.text((1 + 3) * .5, y + h, significance[2], ha='center', va='bottom', color='black', size=7)
 
-    if significance[1] is not None:
-        y = 0.83
-        plt.plot([2+0.02, 2+0.02, 3, 3], [y, y+h, y+h, y], lw=0.5, c='black')
-        plt.text((2 + 3) * .5, y + h, significance[1], ha='center', va='bottom', color='black', size=7)
+    if len(data) == 4:
+        threshold = 0.05 / (8 * 6)
+        if significance[0] < threshold:
+            y = 0.83
+            plt.plot([1, 1, 2-0.02, 2-0.02], [y, y+h, y+h, y], lw=0.4, c='black')
+            plt.text((1 + 2) * .5, y + h, '%.5f' % significance[0], ha='center', va='bottom', color='black', size=7)
+        if significance[1] < threshold:
+            y = 0.83
+            plt.plot([2+0.02, 2+0.02, 3, 3], [y, y+h, y+h, y], lw=0.4, c='black')
+            plt.text((2 + 3) * .5, y + h, '%.5f' % significance[1], ha='center', va='bottom', color='black', size=7)
+        if significance[2] < threshold:
+            y = 0.83
+            plt.plot([3+0.02, 2+0.02, 3, 3], [y, y+h, y+h, y], lw=0.4, c='black')
+            plt.text((2 + 3) * .5, y + h, '%.5f' % significance[2], ha='center', va='bottom', color='black', size=7)
+        if significance[3] < threshold:
+            y = 0.91
+            plt.plot([1, 1, 3, 3], [y, y+h, y+h, y], lw=0.5, c='black')
+            plt.text((1 + 3) * .5, y + h, '%.5f' % significance[3], ha='center', va='bottom', color='black', size=7)
+        if significance[4] < threshold:
+            y = 0.91
+            plt.plot([2, 2, 4, 4], [y, y+h, y+h, y], lw=0.5, c='black')
+            plt.text((2 + 4) * .5, y + h, '%.5f' % significance[4], ha='center', va='bottom', color='black', size=7)
+        if significance[5] < threshold:
+            y = 0.91
+            plt.plot([1, 1, 4, 4], [y, y+h, y+h, y], lw=0.5, c='black')
+            plt.text((1 + 4) * .5, y + h, '%.5f' % significance[4], ha='center', va='bottom', color='black', size=7)
 
-    if significance[2] is not None:
-        y = 0.91
-        plt.plot([1, 1, 3, 3], [y, y+h, y+h, y], lw=0.5, c='black')
-        plt.text((1 + 3) * .5, y + h, significance[2], ha='center', va='bottom', color='black', size=7)
+
 
 def duoptych(foci, foci_colors, color_scales, filenames):
     

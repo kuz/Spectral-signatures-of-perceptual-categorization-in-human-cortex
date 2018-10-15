@@ -16,7 +16,7 @@ import scipy.io as sio
 from scipy.stats import mannwhitneyu
 import pdb
 
-from functions_plotting import quadriptych
+from functions_plotting import quadriptych, triptych_importance
 from functions_helpers import safemkdir
 
 # parameters
@@ -112,27 +112,19 @@ for cid, category in enumerate(categories):
         cluster_color_ids[cluster_labels == important_clusters[cid][i]] = i + 1
 
     # power amplitudes
+    '''
     for i in range(4):
         print "Cluster %d: %.4f" % (i + 1, np.percentile(cluster_means[i, 46:, 20:35], 75))
-
-    '''# difference significance
-    diff_pvalue_matrix = np.zeros((4, 4))
-    for i in range(4):
-        for j in range(4):
-            diff_pvalue_matrix[i, j] = mannwhitneyu(cluster_probe_f1_scores[i], cluster_probe_f1_scores[j])[1] * (8*16)
-    
-    np.set_printoptions(precision=6, suppress=True)
-    print diff_pvalue_matrix
-    print ""'''
+    '''
 
     # generate figures
     foci_colors = np.array([colors[i] for i in cluster_color_ids])
     #importance -= np.percentile(importance[:, :15, :], 90) # normalize by subtracting almost MAX of aseline
     #importance[importance < 0.0] = 0.0 
     #importance /= np.sum(importance)
-    quadriptych(np.mean(importance, 0), successful_mnis, foci_colors, cluster_means, cluster_predictive_score, 
-                '%s' % categories[cid],
-                ['%s/FT_importances_%d_%s_MEAN.png' % (OUTDIR, cid, category)])
+    #quadriptych(np.mean(importance, 0), successful_mnis, foci_colors, cluster_means, cluster_predictive_score, 
+    #            '%s' % categories[cid],
+    #            ['%s/FT_importances_%d_%s_MEAN.png' % (OUTDIR, cid, category)])
 
 
     # importance in time
@@ -198,11 +190,10 @@ for cid, category in enumerate(categories):
         plt.clf();
         plt.close(fig);'''
 
-    '''# Mean over each BA
+    # Mean over each BA
     for ba in np.unique(successful_areas):
-        fig = plt.figure(figsize=(10, 8), dpi=300);
-        title = 'Importance of spectrotemporal features for "%s"\nmean over %d probes in BA%d' % (categories[cid], np.sum(successful_areas == ba), ba)
-        panel_importance(np.mean(importance[successful_areas == ba, :, :], 0), title, True)
-        plt.savefig('%s/FT_importances_%d_%s_BA%d.png' % (OUTDIR, cid, category, ba), bbox_inches='tight');
-        plt.clf();
-        plt.close(fig);'''
+        triptych_importance(np.mean(importance[successful_areas == ba, :, :], 0),
+                            successful_mnis[successful_areas == ba], ['blue'] * len(successful_mnis[successful_areas == ba]), {'blue': 0.5},
+                            ["%s/FT_importances_%d_%s/FT_importances_%d_%s_MEAN_BA%d.png" % (OUTDIR, cid, category, cid, category, ba)],
+                            title='%s, %d probes, BA%d' % (categories[cid], np.sum(successful_areas == ba), ba))
+    pdb.set_trace()
