@@ -57,11 +57,11 @@ for cid, category in enumerate(categories):
 
 # percentage within category
 per_category = counts / counts.sum(axis=1)[:, None]
-heatmap(per_category, counts, "%s/heatmap_area_x_category_per_category.png" % OUTDIR, 'Distribution of successful probes within category', categories, areas_of_interest)
+heatmap(per_category, counts, "%s/heatmap_area_x_category_per_category.png" % OUTDIR, 'Distribution of predictive probes\nover areas within a category', categories, areas_of_interest)
 
 # percentage within area
 per_area = counts / counts.sum(axis=0)[None, :]
-heatmap(per_area, counts, "%s/heatmap_area_x_category_per_area.png" % OUTDIR, 'Distribution of successful probes within area', categories, areas_of_interest)
+heatmap(per_area, counts, "%s/heatmap_area_x_category_per_area.png" % OUTDIR, 'Distribution of predictive probes\nover categories with an area', categories, areas_of_interest)
 
 '''
 # percentage out of total

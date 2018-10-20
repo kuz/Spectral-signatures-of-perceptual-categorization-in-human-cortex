@@ -19,7 +19,6 @@ for sid in scores_spc.keys():
     for pid in scores_spc[sid].keys():
         counts[len(scores_spc[sid][pid])] += 1
 
-
 # plot the histogram
 fig = plt.figure(figsize=(4, 8), dpi=300);
 
@@ -40,3 +39,22 @@ plt.title('Probe polypredictiveness', size=18);
 plt.savefig('%s/predictiveness_of_probes.png' % OUTDIR, bbox_inches='tight');
 plt.clf();
 plt.close(fig);
+
+
+# pairwise category network overlap
+n_categories = len(categories)
+overlap = np.zeros((n_categories, n_categories))
+for sid in scores_spc.keys():
+    for pid in scores_spc[sid].keys():
+
+        if len(scores_spc[sid][pid]) > 1:
+
+            for cid_a in range(n_categories):
+                for cid_b in range(n_categories):
+
+                    if scores_spc[sid][pid].get(cid_a, None) is not None and scores_spc[sid][pid].get(cid_b, None) is not None:
+                        overlap[cid_a, cid_b] += 1
+
+print overlap
+
+
