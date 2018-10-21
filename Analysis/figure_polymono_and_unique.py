@@ -27,6 +27,8 @@ all_mnis_mono = np.empty((0, 3))
 all_mnis_poly = np.empty((0, 3))
 
 # separate plot for each category
+pixel_count_red = np.zeros((5, 4))
+pixel_count_blu = np.zeros((5, 4))
 for cid, category in enumerate(categories):
 
     importance = np.load('%s/%s' % (INDIR, 'FT_feature_importances_ctg%d.npy' % cid))
@@ -87,10 +89,32 @@ for cid, category in enumerate(categories):
     diffmap[np.where(diff * significant_diff > 0)] =  2
     diffmap[np.where(diff * significant_diff < 0)] = -1
     both_mnis = np.vstack((successful_mnis[monoprobes], successful_mnis[polyprobes]))
+    
+    pixel_count_blu += np.array([
+        [np.sum(diffmap[ 0: 4,16:20] == -1), np.sum(diffmap[ 0: 4,20:24] == -1), np.sum(diffmap[ 0: 4,24:32] == -1), np.sum(diffmap[ 0: 4,32:48] == -1)],
+        [np.sum(diffmap[ 4:10,16:20] == -1), np.sum(diffmap[ 4:10,20:24] == -1), np.sum(diffmap[ 4:10,24:32] == -1), np.sum(diffmap[ 4:10,32:48] == -1)],
+        [np.sum(diffmap[10:27,16:20] == -1), np.sum(diffmap[10:27,20:24] == -1), np.sum(diffmap[10:27,24:32] == -1), np.sum(diffmap[10:27,32:48] == -1)],
+        [np.sum(diffmap[27:56,16:20] == -1), np.sum(diffmap[27:56,20:24] == -1), np.sum(diffmap[27:56,24:32] == -1), np.sum(diffmap[27:56,32:48] == -1)],
+        [np.sum(diffmap[56:  ,16:20] == -1), np.sum(diffmap[56:  ,20:24] == -1), np.sum(diffmap[56:  ,24:32] == -1), np.sum(diffmap[56:  ,32:48] == -1)]])
+    pixel_count_red += np.array([
+        [np.sum(diffmap[ 0: 4,16:20] == 2), np.sum(diffmap[ 0: 4,20:24] == 2), np.sum(diffmap[ 0: 4,24:32] == 2), np.sum(diffmap[ 0: 4,32:48] == 2)],
+        [np.sum(diffmap[ 4:10,16:20] == 2), np.sum(diffmap[ 4:10,20:24] == 2), np.sum(diffmap[ 4:10,24:32] == 2), np.sum(diffmap[ 4:10,32:48] == 2)],
+        [np.sum(diffmap[10:27,16:20] == 2), np.sum(diffmap[10:27,20:24] == 2), np.sum(diffmap[10:27,24:32] == 2), np.sum(diffmap[10:27,32:48] == 2)],
+        [np.sum(diffmap[27:56,16:20] == 2), np.sum(diffmap[27:56,20:24] == 2), np.sum(diffmap[27:56,24:32] == 2), np.sum(diffmap[27:56,32:48] == 2)],
+        [np.sum(diffmap[56:  ,16:20] == 2), np.sum(diffmap[56:  ,20:24] == 2), np.sum(diffmap[56:  ,24:32] == 2), np.sum(diffmap[56:  ,32:48] == 2)]])
+
     triptych_fitfdiff(diffmap, both_mnis, ['red'] * len(successful_mnis[monoprobes]) + ['blue'] * len(successful_mnis[polyprobes]),
                       {'red': 0.5, 'blue': 0.5}, ["%s/poly_vs_mono_%d_%s.png" % (OUTDIR, cid, category)],
                       title="%d sigma difference: poly/mono FITF maps of %s" % (sigma, category), lines=True)
 
+pixel_count = pixel_count_blu + pixel_count_red
+print
+print "Proportion of mono probes in quadrants"
+print pixel_count_red
+print
+print "Proportion of poly probes in quadrants"
+print pixel_count_blu
+print
 
 # mono and poly over all categories
 triptych_importance(np.mean(all_importance_mono, axis=0), all_mnis_mono, ['red'] * len(all_mnis_mono),
