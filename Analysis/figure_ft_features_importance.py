@@ -89,6 +89,7 @@ for cid, category in enumerate(categories):
     colors = ['whitesmoke', 'green', 'blue', 'red', 'black']
     cluster_means = np.zeros((4, important_activity_patterns.shape[1], important_activity_patterns.shape[2]))
     cluster_predictive_score = np.zeros((4,))
+    cluster_poly_proportion = np.zeros((4,))
     cluster_color_ids = np.array([0 for x in range(len(cluster_labels))])
     cluster_probe_f1_scores = {0: [], 1: [], 2: [], 3: []}
     for i in range(4):
@@ -103,8 +104,12 @@ for cid, category in enumerate(categories):
             succ_pid -= 1
             sum_scores += scores_spc[succ_sid][succ_pid][cid]
             cluster_probe_f1_scores[i].append(scores_spc[succ_sid][succ_pid][cid])
-        if successful_probes[cluster_labels == important_clusters[cid][i]].shape[0] > 0:
-            cluster_predictive_score[i] = sum_scores / successful_probes[cluster_labels == important_clusters[cid][i]].shape[0]
+            if len(scores_spc[succ_sid][succ_pid]) > 1:
+                cluster_poly_proportion[i] += 1
+        n_probes_in_cluster = successful_probes[cluster_labels == important_clusters[cid][i]].shape[0]
+        if n_probes_in_cluster > 0:
+            cluster_predictive_score[i] = sum_scores / n_probes_in_cluster
+            cluster_poly_proportion[i] = cluster_poly_proportion[i] / float(n_probes_in_cluster) * 100
         else:
             cluster_predictive_score[i] = 0.0
 
@@ -122,9 +127,9 @@ for cid, category in enumerate(categories):
     #importance -= np.percentile(importance[:, :15, :], 90) # normalize by subtracting almost MAX of aseline
     #importance[importance < 0.0] = 0.0 
     #importance /= np.sum(importance)
-    #quadriptych(np.mean(importance, 0), successful_mnis, foci_colors, cluster_means, cluster_predictive_score, 
-    #            '%s' % categories[cid],
-    #            ['%s/FT_importances_%d_%s_MEAN.png' % (OUTDIR, cid, category)])
+    quadriptych(np.mean(importance, 0), successful_mnis, foci_colors, cluster_means, cluster_predictive_score, cluster_poly_proportion, 
+                '%s (%d probes)' % (categories[cid], successful_mnis.shape[0]),
+                ['%s/FT_importances_%d_%s_MEAN.png' % (OUTDIR, cid, category)])
 
 
     # importance in time
@@ -191,9 +196,10 @@ for cid, category in enumerate(categories):
         plt.close(fig);'''
 
     # Mean over each BA
+    '''
     for ba in np.unique(successful_areas):
         triptych_importance(np.mean(importance[successful_areas == ba, :, :], 0),
                             successful_mnis[successful_areas == ba], ['blue'] * len(successful_mnis[successful_areas == ba]), {'blue': 0.5},
                             ["%s/FT_importances_%d_%s/FT_importances_%d_%s_MEAN_BA%d.png" % (OUTDIR, cid, category, cid, category, ba)],
-                            title='%s, %d probes, BA%d' % (categories[cid], np.sum(successful_areas == ba), ba))
-    pdb.set_trace()
+                            title='%s, %d probe(s), BA%d' % (categories[cid], np.sum(successful_areas == ba), ba))
+    '''
