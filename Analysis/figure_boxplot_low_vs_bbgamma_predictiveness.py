@@ -54,7 +54,7 @@ def panel_boxplots(data, significance, xlab, ylab):
 
 for cid in range(8):
     ax = plt.subplot2grid((2, 4), (int(cid / 4), cid % 4), colspan=1, rowspan=1)
-    panel_boxplots(data, [0.0001, None, 0.0003], cid in [4, 5, 6, 7], cid in [0, 4])
+    #panel_boxplots(data, [0.0001, None, 0.0003], cid in [4, 5, 6, 7], cid in [0, 4])
     
 
 plt.savefig('/Users/kuz/Desktop/temp.png', bbox_inches='tight');
