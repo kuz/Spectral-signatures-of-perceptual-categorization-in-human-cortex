@@ -147,7 +147,7 @@ def panel_mesh_axial(foci, foci_colors, color_scales):
     plt.xlim(0, 800);
     plt.ylim(800, 0);
 
-def panel_cluster_mean(cluster_id, cluster_means, cluster_predictive_score, vlim, color, lines=True, xlabels=True, ylabels=True):
+def panel_cluster_mean(cluster_id, cluster_means, cluster_predictive_score, cluster_poly_proportion, count, vlim, color, lines=True, xlabels=True, ylabels=True):
     plt.imshow(cluster_means[cluster_id], interpolation='none', origin='lower', cmap=cm.bwr, aspect=0.3, vmin=-vlim, vmax=vlim);
     plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
     if lines:
@@ -167,9 +167,10 @@ def panel_cluster_mean(cluster_id, cluster_means, cluster_predictive_score, vlim
         #plt.ylabel('Frequency (Hz)', size=16);
     else:
         plt.yticks([])
-    plt.title('Activity of %s electrodes' % color.upper(), size=16, color=color);
+    plt.title('Activity of %s (%d) probes' % (color.upper(), count), size=16, color=color);
     plt.text(1, 129, str(cluster_id + 1), fontsize=20)
-    plt.text(35, 132, '%.4f' % cluster_predictive_score[cluster_id], fontsize=15)
+    plt.text(26, 132, 'F1 = %.4f' % cluster_predictive_score[cluster_id], fontsize=15)
+    plt.text(31, 118, 'Poly %d' % cluster_poly_proportion[cluster_id] + '%', fontsize=15)
 
 def panel_boxplots(data, significance, title, xlab, ylab):
     if title == 'visage':
@@ -302,7 +303,7 @@ def triptych_fitfdiff(tfdata, foci, foci_colors, color_scales, filenames, title=
     plt.clf();
     plt.close(fig);
 
-def quadriptych(importances, foci, foci_colors, cluster_means, cluster_predictive_score, title, filenames, lines=True):
+def quadriptych(importances, foci, foci_colors, cluster_means, cluster_predictive_score, cluster_poly_proportion, title, filenames, lines=True):
     
     fig = plt.figure(figsize=(40, 8), dpi=300);
     vlim = np.max([np.abs(np.min(cluster_means)), np.abs(np.max(cluster_means))]) * 1.2
@@ -313,13 +314,13 @@ def quadriptych(importances, foci, foci_colors, cluster_means, cluster_predictiv
 
     # 4 most prominents clusters of activity under the important regions
     ax1 = plt.subplot2grid((2, 8), (0, 2))
-    panel_cluster_mean(0, cluster_means, cluster_predictive_score, vlim, 'green', lines=True, xlabels=False, ylabels=True)
+    panel_cluster_mean(0, cluster_means, cluster_predictive_score, cluster_poly_proportion, np.sum(foci_colors == 'green'), vlim, 'green', lines=True, xlabels=False, ylabels=True)
     ax1 = plt.subplot2grid((2, 8), (0, 3))
-    panel_cluster_mean(1, cluster_means, cluster_predictive_score, vlim, 'blue', lines=True, xlabels=False, ylabels=False)
+    panel_cluster_mean(1, cluster_means, cluster_predictive_score, cluster_poly_proportion, np.sum(foci_colors == 'blue'), vlim, 'blue', lines=True, xlabels=False, ylabels=False)
     ax1 = plt.subplot2grid((2, 8), (1, 2))
-    panel_cluster_mean(2, cluster_means, cluster_predictive_score, vlim, 'red', lines=True, xlabels=True, ylabels=True)
+    panel_cluster_mean(2, cluster_means, cluster_predictive_score, cluster_poly_proportion, np.sum(foci_colors == 'red'), vlim, 'red', lines=True, xlabels=True, ylabels=True)
     ax1 = plt.subplot2grid((2, 8), (1, 3))
-    panel_cluster_mean(3, cluster_means, cluster_predictive_score, vlim, 'black', lines=True, xlabels=True, ylabels=False)
+    panel_cluster_mean(3, cluster_means, cluster_predictive_score, cluster_poly_proportion, np.sum(foci_colors == 'black'), vlim, 'black', lines=True, xlabels=True, ylabels=False)
 
     # sagittal
     ax1 = plt.subplot2grid((2, 8), (0, 4), colspan=2, rowspan=2)
