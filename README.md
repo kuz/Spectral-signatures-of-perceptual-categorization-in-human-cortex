@@ -1,4 +1,4 @@
-Intracranial Decoding
+Spectral signatures of perceptual categorization in human cortex
 =====================
 
 Start with preprocessing by following the steps outlined in the `Preprocessing` directory.  
