@@ -8,6 +8,11 @@ Start with preprocessing by following the steps outlined in the `Preprocessing` 
 After that perform the decoding as explained in `Classification`.  
 To obtain final figures and analysis results follow the `Analysis` section.
 
+Data
+----
+The final spectrotemproal data is available from 
+https://web.gin.g-node.org/ilyakuzovkin/Spectral-Signatures-of-Perceptual-Categorization-in-Human-Cortex.
+
 Running
 -------
 1. Follow the instructions in [Preprocessing](Preprocessing) to prepare the data,
