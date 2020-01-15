@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 
 To setup Freesurfer run
@@ -39,10 +41,19 @@ def panel_importance(importances, title, lines):
         plt.axhline(y=10, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
         plt.axhline(y=27, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
         plt.axhline(y=56, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
+    
+    # small axis 
     #plt.xticks(np.arange(0, 48, 1.5), np.asarray((np.arange(0, 769, 24) - 256) / 512.0 * 1000, dtype='int'), size=11, rotation=90);
     #plt.yticks(np.arange(0, 146, 5), np.arange(4, 150, 5), size=12);
+    
+    # med axis
     plt.xticks(np.arange(0, 48, 2), np.asarray((np.arange(0, 769, 32) - 256) / 512.0 * 1000, dtype='int'), size=18, rotation=90);
     plt.yticks(np.arange(0, 146, 7), np.arange(4, 150, 7), size=18);
+    
+    # big axis
+    #plt.xticks(np.arange(0, 48, 3), np.asarray((np.arange(0, 769, 48) - 256) / 512.0 * 1000, dtype='int'), size=24, rotation=90);
+    #plt.yticks(np.arange(0, 146, 9), np.arange(4, 150, 9), size=20);
+    
     plt.ylabel('Frequency (Hz)', size=24);
     plt.xlabel('Time (ms)', size=24);
     if title is not None:
@@ -83,10 +94,17 @@ def panel_fitfdiff(diff, title, lines):
         plt.axhline(y=10, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
         plt.axhline(y=27, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
         plt.axhline(y=56, xmin=0.0, xmax = 1.0, linewidth=0.5, color='gray', ls='-')
-    plt.xticks(np.arange(0, 48, 1.5), np.asarray((np.arange(0, 769, 24) - 256) / 512.0 * 1000, dtype='int'), size=16, rotation=90);
-    plt.yticks(np.arange(0, 146, 7), np.arange(4, 150, 7), size=16);
-    plt.ylabel('Frequency (Hz)', size=16);
-    plt.xlabel('Time (ms)', size=16);
+    
+    # small axis
+    #plt.xticks(np.arange(0, 48, 1.5), np.asarray((np.arange(0, 769, 24) - 256) / 512.0 * 1000, dtype='int'), size=16, rotation=90);
+    #plt.yticks(np.arange(0, 146, 7), np.arange(4, 150, 7), size=16);
+    
+    # big axis
+    plt.xticks(np.arange(0, 48, 3), np.asarray((np.arange(0, 769, 48) - 256) / 512.0 * 1000, dtype='int'), size=24, rotation=90);
+    plt.yticks(np.arange(0, 146, 9), np.arange(4, 150, 9), size=24);
+
+    plt.ylabel('Frequency (Hz)', size=24);
+    plt.xlabel('Time (ms)', size=24);
     if title is not None:
         plt.title(title, size=16);
 
@@ -121,10 +139,19 @@ def panel_mesh_sagittal(foci, foci_colors, color_scales):
     brain.show_view('m');
     pic = brain.screenshot()
     plt.imshow(pic);
+
+    # small axis
+    #plt.xlabel('MNI Y', size=24);
+    #plt.xticks(np.arange(0, 800, 40), np.asarray(np.arange(-75, 106, 9.0), dtype='int'), size=18, rotation=90);
+    #plt.ylabel('MNI Z', size=24);
+    #plt.yticks(np.arange(0, 800, 40), np.asarray(np.arange(96, -87, -8.744), dtype='int'), size=18);
+    
+    # big axis
     plt.xlabel('MNI Y', size=24);
-    plt.xticks(np.arange(0, 800, 40), np.asarray(np.arange(-75, 106, 9.0), dtype='int'), size=18, rotation=90);
+    plt.xticks(np.arange(0, 800, 50), np.asarray(np.arange(-75, 106, 11.3125), dtype='int'), size=24, rotation=90);
     plt.ylabel('MNI Z', size=24);
-    plt.yticks(np.arange(0, 800, 40), np.asarray(np.arange(96, -87, -8.744), dtype='int'), size=18);
+    plt.yticks(np.arange(0, 800, 50), np.asarray(np.arange(96, -87, -11.4375), dtype='int'), size=24);
+
     plt.xlim(0, 800);
     plt.ylim(800, 0);
 
@@ -140,14 +167,23 @@ def panel_mesh_axial(foci, foci_colors, color_scales):
     brain.show_view(view=dict(azimuth=0.0, elevation=0), roll=90);
     pic = brain.screenshot()
     plt.imshow(pic);
+
+    # small axis
+    #plt.xlabel('MNI Y', size=24);
+    #plt.xticks(np.arange(0, 800, 40), np.asarray(np.arange(-75, 106, 9.0), dtype='int'), size=18, rotation=90);
+    #plt.ylabel('MNI X', size=24);
+    #plt.yticks(np.arange(0, 800, 40), np.asarray(np.arange(-94.5, 93.5, 9.4), dtype='int'), size=18);
+    
+    # big axis
     plt.xlabel('MNI Y', size=24);
-    plt.xticks(np.arange(0, 800, 40), np.asarray(np.arange(-75, 106, 9.0), dtype='int'), size=18, rotation=90);
-    plt.ylabel('MNI X', size=24);
-    plt.yticks(np.arange(0, 800, 40), np.asarray(np.arange(-94.5, 93.5, 9.4), dtype='int'), size=18);
+    plt.xticks(np.arange(0, 800, 50), np.asarray(np.arange(-75, 106, 11.3125), dtype='int'), size=24, rotation=90);
+    plt.ylabel('MNI Z', size=24);
+    plt.yticks(np.arange(0, 800, 50), np.asarray(np.arange(-94.5, 93.5, 11.75), dtype='int'), size=24);
+
     plt.xlim(0, 800);
     plt.ylim(800, 0);
 
-def panel_cluster_mean(cluster_id, cluster_means, cluster_predictive_score, cluster_poly_proportion, count, vlim, color, lines=True, xlabels=True, ylabels=True):
+def panel_cluster_mean(cluster_id, cluster_means, cluster_predictive_score, cluster_poly_proportion, count, vlim, color, cid, lines=True, xlabels=True, ylabels=True):
     plt.imshow(cluster_means[cluster_id], interpolation='none', origin='lower', cmap=cm.bwr, aspect=0.3, vmin=-vlim, vmax=vlim);
     plt.axvline(x=16, ymin=0.0, ymax = 1.0, linewidth=1.0, color='r', ls='--');
     if lines:
@@ -169,7 +205,8 @@ def panel_cluster_mean(cluster_id, cluster_means, cluster_predictive_score, clus
         plt.yticks([])
     plt.title('Activity of %s (%d) probes' % (color.upper(), count), size=16, color=color);
     plt.text(1, 129, str(cluster_id + 1), fontsize=20)
-    plt.text(26, 132, 'F1 = %.4f' % cluster_predictive_score[cluster_id], fontsize=15)
+    per_cid_stds = [0.11, 0.10, 0.10, 0.09, 0.10, 0.08, 0.10, 0.12]
+    plt.text(26, 132, 'F1 = %.4f ± %.2f' % (cluster_predictive_score[cluster_id], per_cid_stds[cid]), fontsize=15)
     plt.text(31, 118, 'Poly %d' % cluster_poly_proportion[cluster_id] + '%', fontsize=15)
 
 def panel_boxplots(data, significance, title, xlab, ylab):
@@ -303,7 +340,7 @@ def triptych_fitfdiff(tfdata, foci, foci_colors, color_scales, filenames, title=
     plt.clf();
     plt.close(fig);
 
-def quadriptych(importances, foci, foci_colors, cluster_means, cluster_predictive_score, cluster_poly_proportion, title, filenames, lines=True):
+def quadriptych(importances, foci, foci_colors, cluster_means, cluster_predictive_score, cluster_poly_proportion, cid, title, filenames, lines=True):
     
     fig = plt.figure(figsize=(40, 8), dpi=300);
     vlim = np.max([np.abs(np.min(cluster_means)), np.abs(np.max(cluster_means))]) * 1.2
@@ -314,13 +351,13 @@ def quadriptych(importances, foci, foci_colors, cluster_means, cluster_predictiv
 
     # 4 most prominents clusters of activity under the important regions
     ax1 = plt.subplot2grid((2, 8), (0, 2))
-    panel_cluster_mean(0, cluster_means, cluster_predictive_score, cluster_poly_proportion, np.sum(foci_colors == 'green'), vlim, 'green', lines=True, xlabels=False, ylabels=True)
+    panel_cluster_mean(0, cluster_means, cluster_predictive_score, cluster_poly_proportion, np.sum(foci_colors == 'green'), vlim, 'green', cid, lines=True, xlabels=False, ylabels=True)
     ax1 = plt.subplot2grid((2, 8), (0, 3))
-    panel_cluster_mean(1, cluster_means, cluster_predictive_score, cluster_poly_proportion, np.sum(foci_colors == 'blue'), vlim, 'blue', lines=True, xlabels=False, ylabels=False)
+    panel_cluster_mean(1, cluster_means, cluster_predictive_score, cluster_poly_proportion, np.sum(foci_colors == 'blue'), vlim, 'blue', cid, lines=True, xlabels=False, ylabels=False)
     ax1 = plt.subplot2grid((2, 8), (1, 2))
-    panel_cluster_mean(2, cluster_means, cluster_predictive_score, cluster_poly_proportion, np.sum(foci_colors == 'red'), vlim, 'red', lines=True, xlabels=True, ylabels=True)
+    panel_cluster_mean(2, cluster_means, cluster_predictive_score, cluster_poly_proportion, np.sum(foci_colors == 'red'), vlim, 'red', cid, lines=True, xlabels=True, ylabels=True)
     ax1 = plt.subplot2grid((2, 8), (1, 3))
-    panel_cluster_mean(3, cluster_means, cluster_predictive_score, cluster_poly_proportion, np.sum(foci_colors == 'black'), vlim, 'black', lines=True, xlabels=True, ylabels=False)
+    panel_cluster_mean(3, cluster_means, cluster_predictive_score, cluster_poly_proportion, np.sum(foci_colors == 'black'), vlim, 'black', cid, lines=True, xlabels=True, ylabels=False)
 
     # sagittal
     ax1 = plt.subplot2grid((2, 8), (0, 4), colspan=2, rowspan=2)

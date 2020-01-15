@@ -6,6 +6,8 @@ from matplotlib import pylab as plt
 import scipy.io as sio
 from scipy.stats import mannwhitneyu
 import pdb
+#import warnings
+#warnings.filterwarnings('error')
 
 # parameters
 FREQSET = 'FT'
@@ -25,6 +27,19 @@ all_importance_mono = None
 all_importance_poly = None
 all_mnis_mono = np.empty((0, 3))
 all_mnis_poly = np.empty((0, 3))
+
+def safe_mannwhitneyu(a, b):
+    try:
+        return mannwhitneyu(a, b, alternative='less')[1]
+    except ValueError:
+        #print 'ValueError'
+        return 'NA'
+    except:
+        #print 'Warning'
+        return 'NA'
+
+
+
 
 # separate plot for each category
 pixel_count_red = np.zeros((5, 4))
@@ -75,6 +90,49 @@ for cid, category in enumerate(categories):
     most_importantce_poly = np.array(np.mean(importance[polyprobes, :, :], axis = 0) > importance_threshold_poly, dtype=np.int8)
     common_importantce = np.array(most_importantce_mono + most_importantce_poly >= 2, dtype=np.int8)
 
+
+    # statistical test whether polyprobes are important earlier that polyprobes
+    '''
+    mono_importance_times_all = []
+    mono_importance_times_delta = []
+    mono_importance_times_alpha = []
+    mono_importance_times_beta = []
+    mono_importance_times_gamma = []
+    mono_importance_times_highgamma = []
+    imp_monoprobes = importance[monoprobes, :, :]
+    for i in range(imp_monoprobes.shape[0]):
+        mono_importance_times_all += list(np.where(imp_monoprobes[i, :, :] > importance_threshold_mono)[1])
+        mono_importance_times_delta += list(np.where(imp_monoprobes[i,  :4, :] > importance_threshold_mono)[1])
+        mono_importance_times_alpha += list(np.where(imp_monoprobes[i, 4:10, :] > importance_threshold_mono)[1])
+        mono_importance_times_beta += list(np.where(imp_monoprobes[i, 10:27, :] > importance_threshold_mono)[1])
+        mono_importance_times_gamma += list(np.where(imp_monoprobes[i,27:56, :] > importance_threshold_mono)[1])
+        mono_importance_times_highgamma += list(np.where(imp_monoprobes[i, 56:, :] > importance_threshold_mono)[1])
+
+    poly_importance_times_all = []
+    poly_importance_times_delta = []
+    poly_importance_times_alpha = []
+    poly_importance_times_beta = []
+    poly_importance_times_gamma = []
+    poly_importance_times_highgamma = []
+    imp_polyprobes = importance[polyprobes, :, :]
+    for i in range(imp_polyprobes.shape[0]):
+        poly_importance_times_all += list(np.where(imp_polyprobes[i, :, :] > importance_threshold_poly)[1])
+        poly_importance_times_delta += list(np.where(imp_polyprobes[i,  :4, :] > importance_threshold_poly)[1])
+        poly_importance_times_alpha += list(np.where(imp_polyprobes[i, 4:10, :] > importance_threshold_poly)[1])
+        poly_importance_times_beta += list(np.where(imp_polyprobes[i, 10:27, :] > importance_threshold_poly)[1])
+        poly_importance_times_gamma += list(np.where(imp_polyprobes[i,27:56, :] > importance_threshold_poly)[1])
+        poly_importance_times_highgamma += list(np.where(imp_polyprobes[i, 56:, :] > importance_threshold_poly)[1])
+
+    print 'Test: important activity of poly is earlier than of mono for "%s"' % category
+    #print '\tall:   ', mannwhitneyu(poly_importance_times_all, mono_importance_times_all, alternative='less')[1]
+    print '\tdelta: ', mannwhitneyu(poly_importance_times_delta, mono_importance_times_delta, alternative='less')[1]
+    print '\talpha: ', mannwhitneyu(poly_importance_times_alpha, mono_importance_times_alpha, alternative='less')[1]
+    print '\tbeta:  ', mannwhitneyu(poly_importance_times_beta, mono_importance_times_beta, alternative='less')[1]
+    print '\tgamma: ', mannwhitneyu(poly_importance_times_gamma, mono_importance_times_gamma, alternative='less')[1]
+    print '\tbbgamma:', mannwhitneyu(poly_importance_times_highgamma, mono_importance_times_highgamma, alternative='less')[1]
+    print ''
+    '''
+
     # sigma difference
     sigma = 4.0
     mean_importance_mono = np.mean(importance[monoprobes, :, :], axis=0)
@@ -89,7 +147,51 @@ for cid, category in enumerate(categories):
     diffmap[np.where(diff * significant_diff > 0)] =  2
     diffmap[np.where(diff * significant_diff < 0)] = -1
     both_mnis = np.vstack((successful_mnis[monoprobes], successful_mnis[polyprobes]))
-    
+
+    # statistical test whether polyprobes are important earlier that polyprobes
+    '''
+    mono_importance_times_all = []
+    mono_importance_times_delta = []
+    mono_importance_times_alpha = []
+    mono_importance_times_beta = []
+    mono_importance_times_gamma = []
+    mono_importance_times_highgamma = []
+    imp_monoprobes = importance[monoprobes, :, :]
+    for i in range(imp_monoprobes.shape[0]):
+        mono_importance_times_delta += list(np.where(diffmap[ :4, :] == 2)[1])
+        mono_importance_times_alpha += list(np.where(diffmap[4:10, :] == 2)[1])
+        mono_importance_times_beta += list(np.where(diffmap[10:27, :] == 2)[1])
+        mono_importance_times_gamma += list(np.where(diffmap[27:56, :] == 2)[1])
+        mono_importance_times_highgamma += list(np.where(diffmap[56:, :] == 2)[1])
+
+    poly_importance_times_all = []
+    poly_importance_times_delta = []
+    poly_importance_times_alpha = []
+    poly_importance_times_beta = []
+    poly_importance_times_gamma = []
+    poly_importance_times_highgamma = []
+    imp_polyprobes = importance[polyprobes, :, :]
+    for i in range(imp_polyprobes.shape[0]):
+        poly_importance_times_delta += list(np.where(diffmap[ :4, :] == -1)[1])
+        poly_importance_times_alpha += list(np.where(diffmap[4:10, :] == -1)[1])
+        poly_importance_times_beta += list(np.where(diffmap[10:27, :] == -1)[1])
+        poly_importance_times_gamma += list(np.where(diffmap[27:56, :] == -1)[1])
+        poly_importance_times_highgamma += list(np.where(diffmap[56:, :] == -1)[1])
+
+    print 'Test: important activity of poly is earlier than of mono for "%s"' % category
+    #print '\tdelta: ', mannwhitneyu(poly_importance_times_delta, mono_importance_times_delta, alternative='less')[1]
+    #print '\talpha: ', mannwhitneyu(poly_importance_times_alpha, mono_importance_times_alpha, alternative='less')[1]
+    #print '\tbeta:  ', mannwhitneyu(poly_importance_times_beta, mono_importance_times_beta, alternative='less')[1]
+    #print '\tgamma: ', mannwhitneyu(poly_importance_times_gamma, mono_importance_times_gamma, alternative='less')[1]
+    #print '\tbbgamma:', mannwhitneyu(poly_importance_times_highgamma, mono_importance_times_highgamma, alternative='less')[1]
+    print '\tdelta: ', safe_mannwhitneyu(poly_importance_times_delta, mono_importance_times_delta)
+    print '\talpha: ', safe_mannwhitneyu(poly_importance_times_alpha, mono_importance_times_alpha)
+    print '\tbeta:  ', safe_mannwhitneyu(poly_importance_times_beta, mono_importance_times_beta)
+    print '\tgamma: ', safe_mannwhitneyu(poly_importance_times_gamma, mono_importance_times_gamma)
+    print '\tbbgamma:', safe_mannwhitneyu(poly_importance_times_highgamma, mono_importance_times_highgamma)
+    print ''
+    '''
+
     pixel_count_blu += np.array([
         [np.sum(diffmap[ 0: 4,16:20] == -1), np.sum(diffmap[ 0: 4,20:24] == -1), np.sum(diffmap[ 0: 4,24:32] == -1), np.sum(diffmap[ 0: 4,32:48] == -1)],
         [np.sum(diffmap[ 4:10,16:20] == -1), np.sum(diffmap[ 4:10,20:24] == -1), np.sum(diffmap[ 4:10,24:32] == -1), np.sum(diffmap[ 4:10,32:48] == -1)],
@@ -105,7 +207,8 @@ for cid, category in enumerate(categories):
 
     triptych_fitfdiff(diffmap, both_mnis, ['red'] * len(successful_mnis[monoprobes]) + ['blue'] * len(successful_mnis[polyprobes]),
                       {'red': 0.5, 'blue': 0.5}, ["%s/poly_vs_mono_%d_%s.png" % (OUTDIR, cid, category)],
-                      title="%d sigma difference: poly/mono FITF maps of %s" % (sigma, category), lines=True)
+                      title=None, lines=True) # title="%d sigma difference: poly/mono FITF maps of %s" % (sigma, category)
+
 
 pixel_count = pixel_count_blu + pixel_count_red
 print
@@ -130,6 +233,47 @@ importance_threshold_poly = 4 * np.std(all_importance_poly[:, :, :15])
 most_importantce_mono = np.array(np.mean(all_importance_mono, axis = 0) > importance_threshold_mono, dtype=np.int8)
 most_importantce_poly = np.array(np.mean(all_importance_poly, axis = 0) > importance_threshold_poly, dtype=np.int8)
 common_importantce = np.array(most_importantce_mono + most_importantce_poly >= 1, dtype=np.int8)
+
+# statistical test whether polyprobes are important earlier that polyprobes
+'''
+mono_importance_times_all = []
+mono_importance_times_delta = []
+mono_importance_times_alpha = []
+mono_importance_times_beta = []
+mono_importance_times_gamma = []
+mono_importance_times_highgamma = []
+for i in range(all_importance_mono.shape[0]):
+    mono_importance_times_all += list(np.where(all_importance_mono[i, :, :] > importance_threshold_mono)[1])
+    mono_importance_times_delta += list(np.where(all_importance_mono[i,  :4, :] > importance_threshold_mono)[1])
+    mono_importance_times_alpha += list(np.where(all_importance_mono[i, 4:10, :] > importance_threshold_mono)[1])
+    mono_importance_times_beta += list(np.where(all_importance_mono[i, 10:27, :] > importance_threshold_mono)[1])
+    mono_importance_times_gamma += list(np.where(all_importance_mono[i,27:56, :] > importance_threshold_mono)[1])
+    mono_importance_times_highgamma += list(np.where(all_importance_mono[i, 56:, :] > importance_threshold_mono)[1])
+    #mono_importance_times.append(np.mean(np.where(all_importance_mono[i, :, :] > importance_threshold_mono)[1]))
+
+poly_importance_times_all = []
+poly_importance_times_delta = []
+poly_importance_times_alpha = []
+poly_importance_times_beta = []
+poly_importance_times_gamma = []
+poly_importance_times_highgamma = []
+for i in range(all_importance_poly.shape[0]):
+    poly_importance_times_all += list(np.where(all_importance_poly[i, :, :] > importance_threshold_poly)[1])
+    poly_importance_times_delta += list(np.where(all_importance_poly[i,  :4, :] > importance_threshold_poly)[1])
+    poly_importance_times_alpha += list(np.where(all_importance_poly[i, 4:10, :] > importance_threshold_poly)[1])
+    poly_importance_times_beta += list(np.where(all_importance_poly[i, 10:27, :] > importance_threshold_poly)[1])
+    poly_importance_times_gamma += list(np.where(all_importance_poly[i,27:56, :] > importance_threshold_poly)[1])
+    poly_importance_times_highgamma += list(np.where(all_importance_poly[i, 56:, :] > importance_threshold_poly)[1])
+    #poly_importance_times.append(np.mean(np.where(all_importance_poly[i, :, :] > importance_threshold_poly)[1]))
+
+print 'Test: important activity of poly is earlier than of mono'
+print '\tall:   ', mannwhitneyu(poly_importance_times_all, mono_importance_times_all, alternative='less')[1]
+print '\tdelta: ', mannwhitneyu(poly_importance_times_delta, mono_importance_times_delta, alternative='less')[1]
+print '\talpha: ', mannwhitneyu(poly_importance_times_alpha, mono_importance_times_alpha, alternative='less')[1]
+print '\tbeta:  ', mannwhitneyu(poly_importance_times_beta, mono_importance_times_beta, alternative='less')[1]
+print '\tgamma: ', mannwhitneyu(poly_importance_times_gamma, mono_importance_times_gamma, alternative='less')[1]
+print '\tbbgamma:', mannwhitneyu(poly_importance_times_highgamma, mono_importance_times_highgamma, alternative='less')[1]
+'''
 
 # sigma difference
 sigma = 4.0

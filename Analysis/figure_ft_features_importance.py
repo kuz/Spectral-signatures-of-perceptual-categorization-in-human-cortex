@@ -30,7 +30,7 @@ OUTDIR = '../../Outcome/Figures'
 categories = ['house', 'visage', 'animal', 'scene', 'tool', 'pseudoword', 'characters', 'scrambled']
 subjlist = sorted(os.listdir('../../Outcome/Single Probe Classification/%s/Predictions' % FREQSET))
 n_subjects = len(subjlist)
-scores_spc = np.load('%s/../scores_sid_pid_cat.npy' % INDIR).item()
+scores_spc = np.load('%s/../scores_sid_pid_cat.npy' % INDIR, allow_pickle=True).item()
 
 # separate plot for each category
 for cid, category in enumerate(categories):
@@ -39,12 +39,12 @@ for cid, category in enumerate(categories):
     subdir = 'FT_importances_%d_%s' % (cid, category)
     safemkdir('%s/%s' % (OUTDIR, subdir))
 
-    importance = np.load('%s/%s' % (INDIR, 'FT_feature_importances_ctg%d.npy' % cid))
-    successful_probes = np.load('%s/%s' % (INDIR, 'FT_successful_probes_ctg%d.npy' % cid))
-    successful_mnis = np.load('%s/%s' % (INDIR, 'FT_successful_mnis_ctg%d.npy' % cid))
-    successful_areas = np.load('%s/%s' % (INDIR, 'FT_successful_areas_ctg%d.npy' % cid))
-    cluster_labels = np.load('%s/%d-%s/successful_probes_to_cluster_labels.npy' % (CLUSTDIR, cid, categories[cid]))
-    important_activity_patterns = np.load('%s/%d-%s/important_activity_patterns.npy' % (CLUSTDIR, cid, categories[cid]))
+    importance = np.load('%s/%s' % (INDIR, 'FT_feature_importances_ctg%d.npy' % cid), allow_pickle=True)
+    successful_probes = np.load('%s/%s' % (INDIR, 'FT_successful_probes_ctg%d.npy' % cid), allow_pickle=True)
+    successful_mnis = np.load('%s/%s' % (INDIR, 'FT_successful_mnis_ctg%d.npy' % cid), allow_pickle=True)
+    successful_areas = np.load('%s/%s' % (INDIR, 'FT_successful_areas_ctg%d.npy' % cid), allow_pickle=True)
+    cluster_labels = np.load('%s/%d-%s/successful_probes_to_cluster_labels.npy' % (CLUSTDIR, cid, categories[cid]), allow_pickle=True)
+    important_activity_patterns = np.load('%s/%d-%s/important_activity_patterns.npy' % (CLUSTDIR, cid, categories[cid]), allow_pickle=True)
 
     # drop 0,0,0 electrode if it creeps in
     drop_idx = np.unique(np.where(successful_mnis == [0, 0, 0])[0])
@@ -127,8 +127,9 @@ for cid, category in enumerate(categories):
     #importance -= np.percentile(importance[:, :15, :], 90) # normalize by subtracting almost MAX of aseline
     #importance[importance < 0.0] = 0.0 
     #importance /= np.sum(importance)
+    category_name = 'face' if category == 'visage' else category
     quadriptych(np.mean(importance, 0), successful_mnis, foci_colors, cluster_means, cluster_predictive_score, cluster_poly_proportion, 
-                '%s (%d probes)' % (categories[cid], successful_mnis.shape[0]),
+                cid, '%s (%d probes)' % (category_name, successful_mnis.shape[0]),
                 ['%s/FT_importances_%d_%s_MEAN.png' % (OUTDIR, cid, category)])
 
 
